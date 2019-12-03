@@ -6,36 +6,73 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class Level03 {
     public static void main(String[] args) {
         Level03 l = new Level03();
-        int result = l.processResource("input");
-        System.out.println("Result1: " + result);
+        ImmutablePair<LinkedHashSet<Point>, LinkedHashSet<Point>> wires = l.processResource("input");
+        Set<Point> intersections = l.findIntersections(wires);
+        int result1 = l.getDistanceToClosestIntersection(intersections);
+        System.out.println("Result1: " + result1);
+        int result2 = l.getShortestWireLengthToIntersection(wires, intersections);
+        System.out.println("Result1: " + result2);
     }
 
-    public int processResource(String fname) {
-        Set<ImmutablePair<Integer, Integer>> wire1 = new LinkedHashSet<>();
+    public ImmutablePair<LinkedHashSet<Point>, LinkedHashSet<Point>> processResource(String fname) {
         try (BufferedReader br
                      = new BufferedReader(
                 new InputStreamReader(
                         Objects.requireNonNull(Level01.class.getClassLoader().getResourceAsStream("level_03/" + fname))))) {
-            wire1 = parseLine(br.readLine());
-            Set<ImmutablePair<Integer, Integer>> wire2 = parseLine(br.readLine());
-            wire1.retainAll(wire2);
+            return new ImmutablePair<>(parseLine(br.readLine()), parseLine(br.readLine()));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        throw new RuntimeException("Unparseable");
+    }
+
+    Set<Point> findIntersections(ImmutablePair<LinkedHashSet<Point>, LinkedHashSet<Point>> wires) {
+        Set<Point> result = new HashSet<>(wires.getLeft());
+        result.retainAll(wires.getRight());
+        result.remove(Point.ZERO);
+        return result;
+    }
+
+    int getShortestWireLengthToIntersection(ImmutablePair<LinkedHashSet<Point>, LinkedHashSet<Point>> wires, Set<Point> intersections) {
+        Map<Point, Integer> sums = new HashMap<>();
+        LinkedHashSet<Point> wire1 = removeLoops(wires.getLeft());
+        LinkedHashSet<Point> wire2 = removeLoops(wires.getRight());
+
+        // trim wire
+
+        int steps = 0;
+        for (Point z : wire1) {
+            if (intersections.contains(z)) {
+                sums.put(z, sums.getOrDefault(z, 0) + steps);
+            }
+            steps++;
+        }
+        steps = 0;
+        for (Point z : wire2) {
+            if (intersections.contains(z)) {
+                sums.put(z, sums.getOrDefault(z, 0) + steps);
+            }
+            steps++;
+        }
+        return sums.values().stream().min(Integer::compare).orElse(-1);
+    }
+
+    private LinkedHashSet<Point> removeLoops(LinkedHashSet<Point> wire) {
+
+    }
+
+    int getDistanceToClosestIntersection(Set<Point> intersections) {
         int d = Integer.MAX_VALUE;
-        for (ImmutablePair<Integer, Integer> ip : wire1) {
-            if (ip.equals(new ImmutablePair<>(0, 0))) {
+        for (Point ip : intersections) {
+            if (ip.equals(Point.ZERO)) {
                 continue;
             }
-            int nd = Math.abs(ip.getLeft()) + Math.abs(ip.getRight());
+            int nd = Math.abs(ip.getX()) + Math.abs(ip.getY());
             if (nd < d) {
                 d = nd;
             }
@@ -43,9 +80,9 @@ public class Level03 {
         return d;
     }
 
-    Set<ImmutablePair<Integer, Integer>> parseLine(String readLine) {
-        Set<ImmutablePair<Integer, Integer>> result = new HashSet<>();
-        result.add(new ImmutablePair<>(0, 0));
+    LinkedHashSet<Point> parseLine(String readLine) {
+        LinkedHashSet<Point> result = new LinkedHashSet<>();
+        result.add(Point.ZERO);
         int x = 0;
         int y = 0;
         for (String cmd : readLine.split(",")) {
@@ -69,11 +106,41 @@ public class Level03 {
             for (int i = 0; i < distance; i++) {
                 x += dx;
                 y += dy;
-                result.add(new ImmutablePair<>(x, y));
+                result.add(new Point(x, y));
             }
         }
         return result;
     }
 
+    static class Point {
+        ImmutablePair<Integer, Integer> p;
+        final static Point ZERO = new Point(0, 0);
+
+        public Point(int x, int y) {
+            //noinspection SuspiciousNameCombination
+            p = new ImmutablePair<>(x, y);
+        }
+
+        public int getX() {
+            return p.getLeft();
+        }
+
+        public int getY() {
+            return p.getRight();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Point point = (Point) o;
+            return Objects.equals(p, point.p);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(p);
+        }
+    }
 
 }
