@@ -34,7 +34,7 @@ public class Level01 {
 
     private static int recursiveStep(int a) {
         int v = step(a);
-        if(v == 0) return 0;
+        if (v == 0) return 0;
         return v + recursiveStep(v);
     }
 
