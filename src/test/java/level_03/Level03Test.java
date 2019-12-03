@@ -4,16 +4,16 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Level03Test {
     Level03 l;
-    ImmutablePair<LinkedHashSet<Level03.Point>, LinkedHashSet<Level03.Point>> wires0;
-    ImmutablePair<LinkedHashSet<Level03.Point>, LinkedHashSet<Level03.Point>> wires1;
-    ImmutablePair<LinkedHashSet<Level03.Point>, LinkedHashSet<Level03.Point>> wires2;
+    ImmutablePair<ArrayList<Level03.Point>, ArrayList<Level03.Point>> wires0;
+    ImmutablePair<ArrayList<Level03.Point>, ArrayList<Level03.Point>> wires1;
+    ImmutablePair<ArrayList<Level03.Point>, ArrayList<Level03.Point>> wires2;
     Set<Level03.Point> in0intersections;
     Set<Level03.Point> in1intersections;
     Set<Level03.Point> in2intersections;
@@ -45,7 +45,7 @@ class Level03Test {
 
     @Test
     void lineCoordinatesShouldBeParsed() {
-        LinkedHashSet<Level03.Point> lineCoords = l.parseLine("R8,U5,L5,D3");
+        ArrayList<Level03.Point> lineCoords = l.parseLine("R8,U5,L5,D3");
         assertThat(lineCoords).hasSize(22);
         assertThat(lineCoords).contains(new Level03.Point(3, 2));
     }

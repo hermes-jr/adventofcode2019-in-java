@@ -11,7 +11,7 @@ import java.util.*;
 public class Level03 {
     public static void main(String[] args) {
         Level03 l = new Level03();
-        ImmutablePair<LinkedHashSet<Point>, LinkedHashSet<Point>> wires = l.processResource("input");
+        ImmutablePair<ArrayList<Point>, ArrayList<Point>> wires = l.processResource("input");
         Set<Point> intersections = l.findIntersections(wires);
         int result1 = l.getDistanceToClosestIntersection(intersections);
         System.out.println("Result1: " + result1);
@@ -19,7 +19,7 @@ public class Level03 {
         System.out.println("Result1: " + result2);
     }
 
-    public ImmutablePair<LinkedHashSet<Point>, LinkedHashSet<Point>> processResource(String fname) {
+    public ImmutablePair<ArrayList<Point>, ArrayList<Point>> processResource(String fname) {
         try (BufferedReader br
                      = new BufferedReader(
                 new InputStreamReader(
@@ -31,17 +31,17 @@ public class Level03 {
         throw new RuntimeException("Unparseable");
     }
 
-    Set<Point> findIntersections(ImmutablePair<LinkedHashSet<Point>, LinkedHashSet<Point>> wires) {
+    Set<Point> findIntersections(ImmutablePair<ArrayList<Point>, ArrayList<Point>> wires) {
         Set<Point> result = new HashSet<>(wires.getLeft());
         result.retainAll(wires.getRight());
         result.remove(Point.ZERO);
         return result;
     }
 
-    int getShortestWireLengthToIntersection(ImmutablePair<LinkedHashSet<Point>, LinkedHashSet<Point>> wires, Set<Point> intersections) {
+    int getShortestWireLengthToIntersection(ImmutablePair<ArrayList<Point>, ArrayList<Point>> wires, Set<Point> intersections) {
         Map<Point, Integer> sums = new HashMap<>();
-        LinkedHashSet<Point> wire1 = removeLoops(wires.getLeft());
-        LinkedHashSet<Point> wire2 = removeLoops(wires.getRight());
+        ArrayList<Point> wire1 = wires.getLeft();
+        ArrayList<Point> wire2 = wires.getRight();
 
         // trim wire
 
@@ -62,10 +62,6 @@ public class Level03 {
         return sums.values().stream().min(Integer::compare).orElse(-1);
     }
 
-    private LinkedHashSet<Point> removeLoops(LinkedHashSet<Point> wire) {
-
-    }
-
     int getDistanceToClosestIntersection(Set<Point> intersections) {
         int d = Integer.MAX_VALUE;
         for (Point ip : intersections) {
@@ -80,8 +76,8 @@ public class Level03 {
         return d;
     }
 
-    LinkedHashSet<Point> parseLine(String readLine) {
-        LinkedHashSet<Point> result = new LinkedHashSet<>();
+    ArrayList<Point> parseLine(String readLine) {
+        ArrayList<Point> result = new ArrayList<>();
         result.add(Point.ZERO);
         int x = 0;
         int y = 0;
