@@ -14,9 +14,9 @@ public class Level03 {
         ImmutablePair<ArrayList<Point>, ArrayList<Point>> wires = l.processResource("input");
         Set<Point> intersections = l.findIntersections(wires);
         int result1 = l.getDistanceToClosestIntersection(intersections);
-        System.out.println("Result1: " + result1);
+        System.out.println("Part1: " + result1);
         int result2 = l.getShortestWireLengthToIntersection(wires, intersections);
-        System.out.println("Result1: " + result2);
+        System.out.println("Part2: " + result2);
     }
 
     public ImmutablePair<ArrayList<Point>, ArrayList<Point>> processResource(String fname) {
