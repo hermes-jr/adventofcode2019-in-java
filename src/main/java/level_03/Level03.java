@@ -33,7 +33,8 @@ public class Level03 {
 
     Set<Point> findIntersections(ImmutablePair<ArrayList<Point>, ArrayList<Point>> wires) {
         Set<Point> result = new HashSet<>(wires.getLeft());
-        result.retainAll(wires.getRight());
+        Set<Point> second = new HashSet<>(wires.getRight());
+        result.retainAll(second);
         result.remove(Point.ZERO);
         return result;
     }
