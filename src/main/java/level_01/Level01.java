@@ -23,13 +23,13 @@ public class Level01 {
         for (int i : data) {
             result += step(i);
         }
-        System.out.println("part1: " + result);
+        System.out.println("Part1: " + result);
 
         result = 0;
         for (int i : data) {
             result += recursiveStep(i);
         }
-        System.out.println("part2: " + result);
+        System.out.println("Part2: " + result);
     }
 
     private static int recursiveStep(int a) {
