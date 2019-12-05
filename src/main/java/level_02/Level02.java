@@ -37,9 +37,6 @@ public class Level02 {
         int ip = 0;
         mainLoop:
         while (true) {
-            if (ip >= data.length) {
-                ip = ip % data.length;
-            }
             int cv = data[ip];
             switch (cv) {
                 case 99:
