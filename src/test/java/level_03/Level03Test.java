@@ -46,7 +46,8 @@ class Level03Test {
     @Test
     void lineCoordinatesShouldBeParsed() {
         ArrayList<Level03.Point> lineCoords = l.parseLine("R8,U5,L5,D3");
-        assertThat(lineCoords).hasSize(22);
-        assertThat(lineCoords).contains(new Level03.Point(3, 2));
+        assertThat(lineCoords)
+                .hasSize(22)
+                .contains(new Level03.Point(3, 2));
     }
 }

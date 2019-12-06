@@ -29,9 +29,7 @@ class Level02Test {
             "1,9,10,3,2,3,11,0,99,30,40,50:3500"
     }, delimiter = ':')
     void testFirstNumber(String s, int result) {
-
         int[] data = l.parseData(s);
         assertThat(l.runProg(data, data[1], data[2])).isEqualTo(result);
-
     }
 }
