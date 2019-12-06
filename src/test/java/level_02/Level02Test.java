@@ -23,8 +23,6 @@ class Level02Test {
     @ParameterizedTest(name = "0th element of \"{0}\" should be set to {1}")
     @CsvSource(value = {
             "1,0,0,0,99:2",
-            "1,0,0,0,99:2",
-            "1,0,0,0,99:2",
             "2,3,0,3,99:2",
             "2,4,4,5,99,0:2",
             "1,1,1,4,99,5,6,0,99:30",

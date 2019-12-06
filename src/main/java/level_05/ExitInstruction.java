@@ -1,13 +1,13 @@
 package level_05;
 
-public class ExitInstruction implements Instruction {
+public class ExitInstruction extends Instruction {
     @Override
-    public boolean executeOn(int[] data) {
+    boolean executeOn(int[] data) {
         return true;
     }
 
     @Override
-    public int argsLength() {
+    int argsLength() {
         return 0;
     }
 }

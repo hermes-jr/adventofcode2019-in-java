@@ -1,14 +1,14 @@
 package level_05;
 
-public class MultiplyInstruction extends Instruction {
+public class OutputInstruction extends Instruction {
     @Override
     boolean executeOn(int[] data) {
-        data[arguments.get(2)] = arguments.get(0) * arguments.get(1);
+        System.out.println("PROGOUT: " + data[arguments.get(0)]);
         return false;
     }
 
     @Override
     int argsLength() {
-        return 3;
+        return 1;
     }
 }

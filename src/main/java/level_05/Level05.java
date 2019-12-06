@@ -28,25 +28,11 @@ public class Level05 {
         int ip = 0;
 
         while (true) {
-            Instruction c = Instruction.parse(data[ip]);
+            Instruction c = Instruction.parse(data, ip);
             if (c.executeOn(data)) {
                 break;
             }
-            ip += c.argsLength();
-/*
-            switch (cv) {
-                case 99:
-                    // halt code
-                    break mainLoop;
-                case 1:
-                    data[data[ip + 3]] = data[data[ip + 1]] + data[data[ip + 2]];
-                    break;
-                case 2:
-                    data[data[ip + 3]] = data[data[ip + 1]] * data[data[ip + 2]];
-                    break;
-            }
-            ip += 4;
-*/
+            ip += c.argsLength() + 1;
         }
 
         return data[0];

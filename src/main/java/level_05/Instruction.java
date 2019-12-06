@@ -1,21 +1,53 @@
 package level_05;
 
-public interface Instruction {
+import java.util.ArrayList;
+import java.util.List;
 
-    boolean executeOn(int[] data);
+abstract class Instruction {
+    List<Integer> arguments = new ArrayList<>();
 
-    int argsLength();
+    abstract boolean executeOn(int[] data);
 
-    static Instruction parse(int instruction) {
+    abstract int argsLength();
+
+    void addArg(int arg) {
+        arguments.add(arg);
+    }
+
+    static Instruction parse(int[] data, int ip) {
+        int instruction = data[ip];
+
+        Instruction result;
         switch (Level05.getDigitAt(instruction, 0)) {
             case 1:
-                return new AddInstruction();
+                result = new AddInstruction();
+                break;
             case 2:
-                return new MultiplyInstruction();
+                result = new MultiplyInstruction();
+                break;
+            case 3:
+                result = new InputInstruction();
+                break;
+            case 4:
+                result = new OutputInstruction();
+                break;
             case 99:
             default:
-                return new ExitInstruction();
+                result = new ExitInstruction();
+                break;
         }
+
+        for (int i = 1; i <= result.argsLength(); i++) {
+            int iMode = Level05.getDigitAt(instruction, i + 2);
+            int aVal = data[ip + i];
+            if (i == result.argsLength() || iMode == 1) {
+                result.addArg(aVal);
+            } else if (iMode == 0) {
+                result.addArg(data[aVal]);
+            }
+        }
+
+        return result;
     }
 
 
