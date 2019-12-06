@@ -24,7 +24,7 @@ public class Level03 {
                      = new BufferedReader(
                 new InputStreamReader(
                         Objects.requireNonNull(Level01.class.getClassLoader().getResourceAsStream("level_03/" + fname))))) {
-            return new ImmutablePair<>(parseLine(br.readLine()), parseLine(br.readLine()));
+            return ImmutablePair.of(parseLine(br.readLine()), parseLine(br.readLine()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,7 +115,7 @@ public class Level03 {
 
         public Point(int x, int y) {
             //noinspection SuspiciousNameCombination
-            p = new ImmutablePair<>(x, y);
+            p = ImmutablePair.of(x, y);
         }
 
         public int getX() {
