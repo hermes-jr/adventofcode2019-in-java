@@ -48,70 +48,53 @@ public class Level07 {
     }
 
     int calcForPhase(List<Integer> phase) {
-        int nextInput = 0;
+        Integer nextInput = 0;
         Amp[] amps = new Amp[phase.size()];
         for (int i = 0; i < phase.size(); i++) {
             amps[i] = new Amp(initialState, i);
         }
         for (int i = 0; i < phase.size(); i++) {
-            Deque<Integer> stack = new LinkedList<>();
+            Queue<Integer> stack = new LinkedList<>();
             stack.add(phase.get(i));
             stack.add(nextInput);
             amps[i].input = stack;
             ReturnReason ampResult = amps[i].run();
-            if (ampResult.equals(ReturnReason.HALTED) && amps[i].output.peekLast() != null) {
-                nextInput = amps[i].output.getLast();
+            if (ampResult.equals(ReturnReason.HALTED) && amps[i].output.peek() != null) {
+                nextInput = amps[i].output.poll();
             }
+        }
+        if (nextInput == null) {
+            throw new RuntimeException("Unexpected result of program execution");
         }
         return nextInput;
     }
 
     int calcForPhaseCyclic(List<Integer> phase) {
-        Deque<Integer> nextInput = new LinkedList<>();
+        Queue<Integer> nextInput = new LinkedList<>();
         Amp[] amps = new Amp[phase.size()];
         for (int i = 0; i < phase.size(); i++) {
             amps[i] = new Amp(initialState, i);
+            amps[i].input.add(phase.get(i));
+            if (i == 0) {
+                amps[i].input.add(0);
+            }
         }
         int iter = 0;
-        int alive = phase.size();
+
         while (true) {
-            System.out.println("------------------------------------------------");
             Amp currentAmp = amps[iter % (phase.size())];
-            if (currentAmp == null) {
-                iter++;
-                continue;
-            }
-            currentAmp.input.addFirst(phase.get(currentAmp.id));
-            if (iter == 0) {
-                // initial input
-                nextInput.add(0);
-            }
             currentAmp.input.addAll(nextInput);
-            System.out.println("Running " + currentAmp.id + "\n\t" + currentAmp.input + "\n\t" + currentAmp.output);
+            nextInput.clear();
             ReturnReason ampResult = currentAmp.run();
-            System.out.println("Amp ran " + currentAmp.id + "\n\t" + currentAmp.input + "\n\t" + currentAmp.output);
 
-/*
-            if (currentAmp.id + 1 == phase.size()) {
-                if (ampResult.equals(ReturnReason.HALTED)) {
-                    if (currentAmp.output.peekLast() == null) {
-                        throw new RuntimeException("Halted on empty result. Something is wrong");
-                    }
-                    return currentAmp.output.peekLast();
+            if (currentAmp.id + 1 == phase.size() && ampResult.equals(ReturnReason.HALTED)) {
+                if (currentAmp.output.peek() == null) {
+                    throw new RuntimeException("Halted on empty result. Something is wrong");
                 }
+                return currentAmp.output.poll();
             }
-*/
-            nextInput = currentAmp.output;
-            if (ReturnReason.HALTED.equals(ampResult)) {
-                System.out.println(currentAmp.id + " halted with output " + currentAmp.output);
-                amps[currentAmp.id] = null;
-                alive--;
-                if (alive == 0) {
-                    throw new RuntimeException();
-                }
-            }
-
-            currentAmp.output = new LinkedList<>();
+            nextInput.addAll(currentAmp.output);
+            currentAmp.output.clear();
             iter++;
         }
     }
@@ -160,12 +143,12 @@ public class Level07 {
         System.out.println("Part2: " + l.p2());
     }
 
-    class Amp {
+    static class Amp {
         int[] data;
         int id;
         int ip = 0;
-        Deque<Integer> input = new LinkedList<>();
-        Deque<Integer> output = new LinkedList<>();
+        Queue<Integer> input = new LinkedList<>();
+        Queue<Integer> output = new LinkedList<>();
 
         Amp(int[] initialState, int id) {
             this.id = id;
@@ -173,7 +156,6 @@ public class Level07 {
         }
 
         ReturnReason run() {
-            this.data = Arrays.copyOf(initialState, initialState.length);
             while (true) {
                 int icode = getDigitAt(data[ip], 0);
                 int[] args;
@@ -190,11 +172,10 @@ public class Level07 {
                         break;
                     case 3: // in
                         args = parseArgs(ip, 1);
-                        if (input.peekFirst() == null) {
+                        if (input.peek() == null) {
                             return ReturnReason.NO_INPUT;
                         }
-                        data[args[0]] = input.pollFirst();
-                        System.out.println("\t\t" + id + " used value " + data[args[0]] + " new inputs " + input);
+                        data[args[0]] = input.poll();
                         ip += 2;
                         break;
                     case 4: // out
