@@ -31,7 +31,8 @@ class Level07Test {
 
     @Test
     void testSampleProg3() {
-        l.parseData("3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0");
+        String p = l.readResources("example_3");
+        l.parseData(p);
         assertThat(l.calcForPhase(Arrays.asList(1, 0, 4, 3, 2))).isEqualTo(65210);
     }
 
@@ -39,6 +40,20 @@ class Level07Test {
     void testSampleProg1AutoDetectBestPerm() {
         l.parseData("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0");
         assertThat(l.p1()).isEqualTo(43210);
+    }
+
+    @Test
+    void testSampleProg4() {
+        String p = l.readResources("example_4");
+        l.parseData(p);
+        assertThat(l.calcForPhaseCyclic(Arrays.asList(9, 8, 7, 6, 5))).isEqualTo(139629729);
+    }
+
+    @Test
+    void testSampleProg5() {
+        String p = l.readResources("example_5");
+        l.parseData(p);
+        assertThat(l.calcForPhaseCyclic(Arrays.asList(9, 7, 8, 5, 6))).isEqualTo(18216);
     }
 
 }
