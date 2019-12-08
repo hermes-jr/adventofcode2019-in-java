@@ -48,6 +48,30 @@ public class Level08 {
         return ones * twos;
     }
 
+    String p2() {
+        StringBuilder sb = new StringBuilder("\n");
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                layerLoop:
+                for (int l = 0; l < layers; l++) {
+                    int p = getDigitAt(j, i, l);
+                    switch (p) {
+                        case 0:
+                            sb.append(' ');
+                            break layerLoop;
+                        case 1:
+                            sb.append('#');
+                            break layerLoop;
+                    }
+                }
+                sb.append(' ');
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
+    }
+
     int getLayerWithFewestZeros() {
         int fz = Integer.MAX_VALUE;
         int fli = -1;
@@ -84,8 +108,9 @@ public class Level08 {
     }
 
     int getDigitAt(int x, int y, int z) {
-        int idx = z * (w + h + 1) + w * y + x;
-        if (idx >= data.length) {
+
+        int idx = z * (w * h) + w * y + x;
+        if (idx >= data.length || idx < 0) {
             throw new IndexOutOfBoundsException("No such coordinate in image");
         }
         return data[idx];
@@ -94,6 +119,7 @@ public class Level08 {
     public static void main(String[] args) {
         Level08 l = new Level08("input", 25, 6);
         System.out.println("Part1: " + l.p1());
+        System.out.println("Part2: " + l.p2());
     }
 
 }

@@ -51,8 +51,14 @@ class Level08Test {
     void layerWithFewestZerosShouldBeDetected() {
         Level08 l = new Level08("in3", 3, 2);
         assertThat(l.getLayerWithFewestZeros()).isEqualTo(2);
-        
+
         Level08 l2 = new Level08("in1", 3, 2);
         assertThat(l2.getLayerWithFewestZeros()).isEqualTo(0);
+    }
+
+    @Test
+    void coloredPixelsTest() {
+        Level08 l = new Level08("in4", 2, 2);
+        assertThat(l.p2()).isEqualTo("\n #\n# \n");
     }
 }
