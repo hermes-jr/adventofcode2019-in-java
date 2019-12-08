@@ -31,7 +31,7 @@ class Level07Test {
 
     @Test
     void testSampleProg3() {
-        String p = l.readResources("example_3");
+        String p = l.readResources("in3");
         l.parseData(p);
         assertThat(l.calcForPhase(Arrays.asList(1, 0, 4, 3, 2))).isEqualTo(65210);
     }
@@ -44,14 +44,14 @@ class Level07Test {
 
     @Test
     void testSampleProg4() {
-        String p = l.readResources("example_4");
+        String p = l.readResources("in4");
         l.parseData(p);
         assertThat(l.calcForPhaseCyclic(Arrays.asList(9, 8, 7, 6, 5))).isEqualTo(139629729);
     }
 
     @Test
     void testSampleProg5() {
-        String p = l.readResources("example_5");
+        String p = l.readResources("in5");
         l.parseData(p);
         assertThat(l.calcForPhaseCyclic(Arrays.asList(9, 7, 8, 5, 6))).isEqualTo(18216);
     }

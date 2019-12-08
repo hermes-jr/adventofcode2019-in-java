@@ -17,13 +17,13 @@ class Level06Test {
 
     @Test
     void partOneFormulaShouldWork() {
-        SimpleGraph<String, DefaultEdge> g = l.readResources("example1");
+        SimpleGraph<String, DefaultEdge> g = l.readResources("in1");
         assertThat(l.p1(g)).isEqualTo(42);
     }
 
     @Test
     void partTwoFormulaShouldWork() {
-        SimpleGraph<String, DefaultEdge> g = l.readResources("example2");
+        SimpleGraph<String, DefaultEdge> g = l.readResources("in2");
         assertThat(l.p2(g)).isEqualTo(4);
     }
 
