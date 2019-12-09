@@ -45,6 +45,10 @@ class Level08Test {
                 .withNoCause();
 
         assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> l.getDigitAt(3, 3, 0));
+        assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> l.getDigitAt(5, 0, 0));
+        assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> l.getDigitAt(-1, 0, 0));
+        assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> l.getDigitAt(1, 1, -1));
+        assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> l.getDigitAt(1, 50, 0));
     }
 
     @Test

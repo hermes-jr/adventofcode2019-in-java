@@ -110,7 +110,7 @@ public class Level08 {
     int getDigitAt(int x, int y, int z) {
 
         int idx = z * (w * h) + w * y + x;
-        if (idx >= data.length || idx < 0) {
+        if (x < 0 || y < 0 || z < 0 || x >= w || y >= h || z >= layers || idx >= data.length || idx < 0) {
             throw new IndexOutOfBoundsException("No such coordinate in image");
         }
         return data[idx];
