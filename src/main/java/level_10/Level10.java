@@ -66,7 +66,7 @@ public class Level10 {
 
     public static void main(String[] args) {
         Level10 l = new Level10("input");
-        System.out.println("Part1: " + Arrays.toString(l.p1()));
+        System.out.println("Part1: " + l.p1()[2]);
     }
 
     public int getSinglePointVisibleCount(Point asteroid) {
