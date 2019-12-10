@@ -3,7 +3,6 @@ package level_09;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
 import java.util.*;
 
 public class Level09 {
@@ -27,25 +26,25 @@ public class Level09 {
         argSizes.put(99, 0);
     }
 
-    Map<BigInteger, BigInteger> parseData(String indata) {
+    Map<Long, Long> parseData(String indata) {
         String[] tokens = indata.split(",");
-        Map<BigInteger, BigInteger> result = new HashMap<>();
+        Map<Long, Long> result = new HashMap<>();
         for (int i = 0; i < tokens.length; i++) {
-            result.put(BigInteger.valueOf(i), BigInteger.valueOf(Long.parseLong(tokens[i])));
+            result.put((long) i, Long.parseLong(tokens[i]));
         }
         return result;
     }
 
-    BigInteger p1(String s) {
+    Long p1(String s) {
         IntComp ic = new IntComp(parseData(s), 0);
-        ic.input.add(BigInteger.ONE);
+        ic.input.add(1L);
         ic.run();
         return ic.output.peek();
     }
 
-    BigInteger p2(String s) {
+    Long p2(String s) {
         IntComp ic = new IntComp(parseData(s), 1);
-        ic.input.add(BigInteger.valueOf(2));
+        ic.input.add(2L);
         ic.run();
         return ic.output.peek();
     }
@@ -62,96 +61,93 @@ public class Level09 {
         }
     }
 
-    static int getDigitAt(BigInteger number, int pos) {
-        BigInteger abs = number.abs();
-        return pos == 0 ? abs.mod(BigInteger.valueOf(100L)).intValue() : abs.divide(BigInteger.TEN.pow(pos - 1)).mod(BigInteger.TEN).intValue();
-
-    }
-
     public static void main(String[] args) {
+        long start = System.currentTimeMillis();
         Level09 l = new Level09();
         String in = l.readResources("input");
         System.out.println("Part1: " + l.p1(in));
         System.out.println("Part1: " + l.p2(in));
+        long time = System.currentTimeMillis() - start;
+        System.out.println("Time: " + time);
     }
 
     static class IntComp {
-        Map<BigInteger, BigInteger> data;
+        Map<Long, Long> data;
         int id;
-        BigInteger ip = BigInteger.ZERO;
-        BigInteger relBase = BigInteger.ZERO;
-        Queue<BigInteger> input = new LinkedList<>();
-        Queue<BigInteger> output = new LinkedList<>();
+        long ip;
+        long relBase;
+        Queue<Long> input = new LinkedList<>();
+        Queue<Long> output = new LinkedList<>();
 
-        IntComp(Map<BigInteger, BigInteger> initialState, int id) {
+        IntComp(Map<Long, Long> initialState, int id) {
             this.id = id;
             this.data = initialState;
         }
 
         ReturnReason run() {
             while (true) {
-                int iCode = data.getOrDefault(ip, BigInteger.ZERO).mod(BigInteger.valueOf(100L)).intValue();
-                int[] argModes = getInstructionModes(data.getOrDefault(ip, BigInteger.ZERO).divide(BigInteger.valueOf(100)), argSizes.get(iCode));
-                BigInteger v1, v2;
+                int iCode = Math.toIntExact(data.getOrDefault(ip, 0L) % 100L);
+                int[] argModes = getInstructionModes(data.getOrDefault(ip, 0L) / 100L, argSizes.get(iCode));
+                long v1, v2;
                 switch (iCode) {
                     case 1: // add
                         v1 = readValue(ip, 0, argModes);
                         v2 = readValue(ip, 1, argModes);
-                        writeValue(ip, 2, argModes, v1.add(v2));
-                        ip = ip.add(BigInteger.valueOf(argSizes.get(iCode) + 1));
+                        writeValue(ip, 2, argModes, v1 + v2);
+                        ip += argSizes.get(iCode) + 1L;
                         break;
                     case 2: // mul
                         v1 = readValue(ip, 0, argModes);
                         v2 = readValue(ip, 1, argModes);
-                        writeValue(ip, 2, argModes, v1.multiply(v2));
-                        ip = ip.add(BigInteger.valueOf(argSizes.get(iCode) + 1));
+                        writeValue(ip, 2, argModes, v1 * v2);
+                        ip += argSizes.get(iCode) + 1L;
                         break;
                     case 3: // in
                         if (input.peek() == null) {
                             return ReturnReason.NO_INPUT;
                         }
                         writeValue(ip, 0, argModes, input.poll());
-                        ip = ip.add(BigInteger.valueOf(argSizes.get(iCode) + 1));
+                        ip += argSizes.get(iCode) + 1L;
                         break;
                     case 4: // out
                         v1 = readValue(ip, 0, argModes);
                         output.add(v1);
-                        ip = ip.add(BigInteger.valueOf(argSizes.get(iCode) + 1));
+                        ip += argSizes.get(iCode) + 1L;
                         break;
                     case 5: // jit
                         v1 = readValue(ip, 0, argModes);
                         v2 = readValue(ip, 1, argModes);
-                        if (v1.signum() != 0) {
+                        if (v1 != 0L) {
                             ip = v2;
                         } else {
-                            ip = ip.add(BigInteger.valueOf(argSizes.get(iCode) + 1));
+                            ip += argSizes.get(iCode) + 1L;
                         }
                         break;
                     case 6: // jif
                         v1 = readValue(ip, 0, argModes);
                         v2 = readValue(ip, 1, argModes);
-                        if (v1.signum() == 0) {
+                        if (v1 == 0L) {
                             ip = v2;
                         } else {
-                            ip = ip.add(BigInteger.valueOf(argSizes.get(iCode) + 1));
+                            ip += argSizes.get(iCode) + 1L;
                         }
                         break;
                     case 7: // lt
                         v1 = readValue(ip, 0, argModes);
                         v2 = readValue(ip, 1, argModes);
-                        writeValue(ip, 2, argModes, (v1.compareTo(v2) < 0) ? BigInteger.ONE : BigInteger.ZERO);
-                        ip = ip.add(BigInteger.valueOf(argSizes.get(iCode) + 1));
+                        writeValue(ip, 2, argModes, (v1 < v2) ? 1L : 0L);
+                        ip += argSizes.get(iCode) + 1L;
                         break;
                     case 8: // eq
                         v1 = readValue(ip, 0, argModes);
                         v2 = readValue(ip, 1, argModes);
-                        writeValue(ip, 2, argModes, (v1.compareTo(v2) == 0) ? BigInteger.ONE : BigInteger.ZERO);
-                        ip = ip.add(BigInteger.valueOf(argSizes.get(iCode) + 1));
+                        writeValue(ip, 2, argModes, (v1 == v2) ? 1L : 0L);
+                        ip += argSizes.get(iCode) + 1L;
                         break;
                     case 9: // relbase
                         v1 = readValue(ip, 0, argModes);
-                        relBase = relBase.add(v1);
-                        ip = ip.add(BigInteger.valueOf(argSizes.get(iCode) + 1));
+                        relBase += v1;
+                        ip += argSizes.get(iCode) + 1L;
                         break;
                     case 99:
                         return ReturnReason.HALTED;
@@ -161,32 +157,32 @@ public class Level09 {
             }
         }
 
-        BigInteger readValue(BigInteger ip, int argNum, int[] argModes) {
-            BigInteger argVal = data.getOrDefault(ip.add(BigInteger.valueOf(argNum + 1)), BigInteger.ZERO);
+        Long readValue(long ip, int argNum, int[] argModes) {
+            Long argVal = data.getOrDefault(ip + argNum + 1L, 0L);
             if (argModes[argNum] == 0) {
-                return data.getOrDefault(argVal, BigInteger.ZERO);
+                return data.getOrDefault(argVal, 0L);
             } else if (argModes[argNum] == 1) {
                 return argVal;
             } else if (argModes[argNum] == 2) {
-                return data.getOrDefault(argVal.add(relBase), BigInteger.ZERO);
+                return data.getOrDefault(argVal + relBase, 0L);
             }
             throw new RuntimeException("Unknown argument mode");
         }
 
-        void writeValue(BigInteger ip, int argNum, int[] argModes, BigInteger value) {
-            BigInteger argVal = data.getOrDefault(ip.add(BigInteger.valueOf(argNum + 1)), BigInteger.ZERO);
+        void writeValue(long ip, int argNum, int[] argModes, long value) {
+            Long argVal = data.getOrDefault(ip + argNum + 1L, 0L);
             if (argModes[argNum] == 0) {
                 data.put(argVal, value);
             } else if (argModes[argNum] == 2) {
-                data.put(argVal.add(relBase), value);
+                data.put(argVal + relBase, value);
             }
         }
 
-        public int[] getInstructionModes(BigInteger instuction, int argsLength) {
+        public int[] getInstructionModes(Long instruction, int argsLength) {
             int[] result = new int[argsLength];
             for (int i = 0; i < argsLength; i++) {
-                result[i] = instuction.mod(BigInteger.TEN).intValue();
-                instuction = instuction.divide(BigInteger.TEN);
+                result[i] = Math.toIntExact(instruction % 10L);
+                instruction /= 10L;
             }
             return result;
         }
