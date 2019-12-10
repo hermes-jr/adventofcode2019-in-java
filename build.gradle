@@ -1,11 +1,10 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group 'net.cyllene.games'
 version '1.0-SNAPSHOT'
-
-sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -15,9 +14,8 @@ test {
     useJUnitPlatform()
 }
 
-task fatJar(type: Jar) {
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+application {
+    mainClassName = 'RunAll'
 }
 
 dependencies {

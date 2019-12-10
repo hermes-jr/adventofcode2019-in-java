@@ -62,13 +62,10 @@ public class Level09 {
     }
 
     public static void main(String[] args) {
-        long start = System.currentTimeMillis();
         Level09 l = new Level09();
         String in = l.readResources("input");
         System.out.println("Part1: " + l.p1(in));
         System.out.println("Part1: " + l.p2(in));
-        long time = System.currentTimeMillis() - start;
-        System.out.println("Time: " + time);
     }
 
     static class IntComp {
