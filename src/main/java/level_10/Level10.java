@@ -12,7 +12,7 @@ import java.util.*;
 public class Level10 {
     final static boolean VERBOSE = false;
     List<Point> asteroids;
-    SortedMap<Double, List<Point>> lines = new TreeMap<>();
+    SortedMap<BigDecimal, List<Point>> lines = new TreeMap<>();
     int MAX_X;
     int MAX_Y;
 
@@ -98,12 +98,17 @@ public class Level10 {
             }
             if (VERBOSE) System.out.println("Testing " + other + " and all on the same line of sight");
             checked.add(other);
-            List<Point> sameLine = new LinkedList<>();
+            List<Point> sameLine = new ArrayList<>();
             sameLine.add(asteroid);
             sameLine.add(other);
-            int a = asteroid.getY() - other.getY();
-            int b = other.getX() - asteroid.getX();
-            int c = asteroid.getX() * other.getY() - other.getX() * asteroid.getY();
+            int x1 = asteroid.getX();
+            int x2 = other.getX();
+            int y1 = asteroid.getY();
+            int y2 = other.getY();
+
+            int a = y1 - y2;
+            int b = x2 - x1;
+            int c = x1 * y2 - x2 * y1;
             if (VERBOSE) System.out.printf("Visibility line: %sx + %sy + %s = 0%n", a, b, c);
             for (Point yetAnother : asteroids) {
                 if (yetAnother.equals(asteroid) || yetAnother.equals(other) || checked.contains(yetAnother)) {
@@ -115,9 +120,12 @@ public class Level10 {
                 }
             }
             if (updateLines) {
-                double pureAngle = BigDecimal.valueOf(Math.atan2(other.getY() - asteroid.getY(), other.getX() - asteroid.getX())).setScale(6, RoundingMode.HALF_UP).doubleValue();
-                double lesser = pureAngle - 2.5 * Math.PI;
-                Double angle = (lesser >= 0.0) ? lesser : pureAngle + 1.5 * Math.PI;
+//                BigDecimal angle = BigDecimal.valueOf(Math.toDegrees(Math.atan2(y2 - y1, x2 - x1) + 1.5 * Math.PI) % 360.0).setScale(6, RoundingMode.HALF_UP);
+                double zz = Math.atan2(y2 - y1, x2 - x1) + 0.5 * Math.PI;
+                if (zz > Math.PI) zz -= 2.0 * Math.PI;
+                else if (zz < -Math.PI) zz += 2.0 * Math.PI;
+                BigDecimal angle = BigDecimal.valueOf(Math.toDegrees(zz)).setScale(6, RoundingMode.HALF_UP);
+
                 lines.put(angle, sameLine);
             }
             if (sameLine.size() > 2) {
