@@ -40,6 +40,19 @@ class Level10Test {
         assertThat(l.getSinglePointVisibleCount(new Level10.Point(3, 4))).isEqualTo(8);
     }
 
+    @Test
+    void testEliminationOrderSimplest() {
+        Level10 l = new Level10("in6");
+        assertThat(l.p2(new Level10.Point(3, 8))).isEqualTo(802);
+    }
+
+    @Test
+    void testEliminationOrderSimplest2() {
+        Level10 l = new Level10("in0");
+        assertThat(l.p2(new Level10.Point(0, 0))).isEqualTo(101);
+        assertThat(l.p2(new Level10.Point(1, 1))).isEqualTo(2);
+    }
+
     @ParameterizedTest(name = "For \"{0}\" an optimal point {1}:{2} with visibility of ${3} should be returned")
     @CsvSource(value = {
             "in1,3,4,8",
