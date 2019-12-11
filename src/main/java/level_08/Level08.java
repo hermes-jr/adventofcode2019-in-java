@@ -46,7 +46,7 @@ public class Level08 extends Level {
     }
 
     String p2() {
-        StringBuilder sb = new StringBuilder("\n");
+        StringBuilder sb = new StringBuilder(System.lineSeparator());
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 layerLoop:
@@ -63,7 +63,7 @@ public class Level08 extends Level {
                 }
                 sb.append(' ');
             }
-            sb.append("\n");
+            sb.append(System.lineSeparator());
         }
 
         return sb.toString();

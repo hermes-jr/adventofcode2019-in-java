@@ -63,6 +63,6 @@ class Level08Test {
     @Test
     void coloredPixelsTest() {
         Level08 l = new Level08("in4", 2, 2);
-        assertThat(l.p2()).isEqualTo("\n  # \n#   \n");
+        assertThat(l.p2().replaceAll("[^ #]", "")).isEqualTo("  # #   ");
     }
 }
