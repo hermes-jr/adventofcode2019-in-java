@@ -1,5 +1,6 @@
 package level_10;
 
+import common.Point;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -25,39 +26,39 @@ class Level10Test {
     })
     void testSinglePointVisibilityCounter(String s, int x, int y, int canBeSeen) {
         Level10 l = new Level10(s);
-        assertThat(l.getSinglePointVisibleCount(new Level10.Point(x, y))).isEqualTo(canBeSeen);
+        assertThat(l.getSinglePointVisibleCount(new Point(x, y))).isEqualTo(canBeSeen);
     }
 
     @Test
     void simplestMap() {
         Level10 l = new Level10("in0");
-        assertThat(l.getSinglePointVisibleCount(new Level10.Point(0, 0))).isEqualTo(2);
+        assertThat(l.getSinglePointVisibleCount(new Point(0, 0))).isEqualTo(2);
     }
 
     @Test
     void getForEach() {
         Level10 l = new Level10("in1");
-        assertThat(l.getSinglePointVisibleCount(new Level10.Point(3, 4))).isEqualTo(8);
+        assertThat(l.getSinglePointVisibleCount(new Point(3, 4))).isEqualTo(8);
     }
 
     @Test
     void testEliminationOrderAsInGiven() {
         Level10 l = new Level10("in5");
-        assertThat(l.p2(new Level10.Point(11, 13))).isEqualTo(802);
+        assertThat(l.p2(new Point(11, 13))).isEqualTo(802);
     }
 
     @Test
     void badExample() {
         Level10 l = new Level10("in6");
-        assertThat(l.p2(new Level10.Point(8, 3))).isEqualTo(1403);
+        assertThat(l.p2(new Point(8, 3))).isEqualTo(1403);
     }
 
     @Test
     void testEliminationOrderSimplest2() {
         Level10 l = new Level10("in0");
-        assertThat(l.p2(new Level10.Point(0, 0))).isEqualTo(2);
-        assertThat(l.p2(new Level10.Point(1, 1))).isEqualTo(0);
-        assertThat(l.p2(new Level10.Point(0, 2))).isEqualTo(101);
+        assertThat(l.p2(new Point(0, 0))).isEqualTo(2);
+        assertThat(l.p2(new Point(1, 1))).isEqualTo(0);
+        assertThat(l.p2(new Point(0, 2))).isEqualTo(101);
     }
 
     @ParameterizedTest(name = "For \"{0}\" an optimal point {1}:{2} with visibility of ${3} should be returned")

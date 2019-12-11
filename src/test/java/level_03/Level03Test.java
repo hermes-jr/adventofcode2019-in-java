@@ -1,5 +1,6 @@
 package level_03;
 
+import common.Point;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,12 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Level03Test {
     Level03 l;
-    ImmutablePair<ArrayList<Level03.Point>, ArrayList<Level03.Point>> wires0;
-    ImmutablePair<ArrayList<Level03.Point>, ArrayList<Level03.Point>> wires1;
-    ImmutablePair<ArrayList<Level03.Point>, ArrayList<Level03.Point>> wires2;
-    Set<Level03.Point> in0intersections;
-    Set<Level03.Point> in1intersections;
-    Set<Level03.Point> in2intersections;
+    ImmutablePair<ArrayList<Point>, ArrayList<Point>> wires0;
+    ImmutablePair<ArrayList<Point>, ArrayList<Point>> wires1;
+    ImmutablePair<ArrayList<Point>, ArrayList<Point>> wires2;
+    Set<Point> in0intersections;
+    Set<Point> in1intersections;
+    Set<Point> in2intersections;
 
     @BeforeEach
     void beforeEach() {
@@ -45,9 +46,9 @@ class Level03Test {
 
     @Test
     void lineCoordinatesShouldBeParsed() {
-        ArrayList<Level03.Point> lineCoords = l.parseLine("R8,U5,L5,D3");
+        ArrayList<Point> lineCoords = l.parseLine("R8,U5,L5,D3");
         assertThat(lineCoords)
                 .hasSize(22)
-                .contains(new Level03.Point(3, 2));
+                .contains(new Point(3, 2));
     }
 }

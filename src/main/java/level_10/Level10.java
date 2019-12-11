@@ -1,6 +1,7 @@
 package level_10;
 
 import common.Level;
+import common.Point;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.math.BigDecimal;
@@ -175,45 +176,4 @@ public class Level10 extends Level {
         return Math.atan2(0, 0);
     }
 
-    static class Point implements Comparable<Point> {
-        ImmutablePair<Integer, Integer> p;
-
-        final static Comparator<Point> POINT_COMPARATOR = Comparator.comparingInt(Point::getX).thenComparingInt(Point::getY);
-
-        public Point(int x, int y) {
-            //noinspection SuspiciousNameCombination
-            p = ImmutablePair.of(x, y);
-        }
-
-        public int getX() {
-            return p.getLeft();
-        }
-
-        public int getY() {
-            return p.getRight();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Level10.Point point = (Level10.Point) o;
-            return Objects.equals(p, point.p);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(p);
-        }
-
-        @Override
-        public String toString() {
-            return "[" + getX() + ":" + getY() + "]";
-        }
-
-        @Override
-        public int compareTo(Point o) {
-            return POINT_COMPARATOR.compare(this, o);
-        }
-    }
 }

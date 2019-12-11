@@ -1,6 +1,7 @@
 package level_03;
 
 import common.Level;
+import common.Point;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.*;
@@ -97,37 +98,6 @@ public class Level03 extends Level {
             }
         }
         return result;
-    }
-
-    static class Point {
-        ImmutablePair<Integer, Integer> p;
-        final static Point ZERO = new Point(0, 0);
-
-        public Point(int x, int y) {
-            //noinspection SuspiciousNameCombination
-            p = ImmutablePair.of(x, y);
-        }
-
-        public int getX() {
-            return p.getLeft();
-        }
-
-        public int getY() {
-            return p.getRight();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Point point = (Point) o;
-            return Objects.equals(p, point.p);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(p);
-        }
     }
 
 }
