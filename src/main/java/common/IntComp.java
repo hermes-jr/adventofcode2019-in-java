@@ -1,12 +1,10 @@
 package common;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 public class IntComp {
     Map<Long, Long> data;
+    String originalProg;
     int id;
     long ip;
     long relBase;
@@ -14,13 +12,18 @@ public class IntComp {
     Queue<Long> output = new LinkedList<>();
 
     public IntComp(String s, int id) {
+        originalProg = s;
         this.id = id;
+        this.data = parseProg(originalProg);
+    }
+
+    private Map<Long, Long> parseProg(String s) {
         String[] tokens = s.split(",");
-        Map<Long, Long> parsedState = new HashMap<>();
+        Map<Long, Long> parsedProg = new HashMap<>();
         for (int i = 0; i < tokens.length; i++) {
-            parsedState.put((long) i, Long.parseLong(tokens[i]));
+            parsedProg.put((long) i, Long.parseLong(tokens[i]));
         }
-        this.data = parsedState;
+        return parsedProg;
     }
 
     public void addToInput(long p) {
@@ -43,6 +46,14 @@ public class IntComp {
         return data;
     }
 
+    public void reset() {
+        this.data = parseProg(originalProg);
+        this.output.clear();
+        this.input.clear();
+        this.ip = 0L;
+        this.relBase = 0L;
+    }
+
     public enum ReturnReason {
         HALTED,
         NO_INPUT
@@ -61,6 +72,16 @@ public class IntComp {
         argSizes.put(8, 3);
         argSizes.put(9, 1);
         argSizes.put(99, 0);
+    }
+
+    public ReturnReason run(Collection<Long> inData) {
+        this.input.addAll(inData);
+        return run();
+    }
+
+    public ReturnReason run(long singleArg) {
+        this.input.add(singleArg);
+        return run();
     }
 
     public ReturnReason run() {
@@ -157,7 +178,7 @@ public class IntComp {
         }
     }
 
-    public int[] getInstructionModes(Long instruction, int argsLength) {
+    int[] getInstructionModes(Long instruction, int argsLength) {
         int[] result = new int[argsLength];
         for (int i = 0; i < argsLength; i++) {
             result[i] = Math.toIntExact(instruction % 10L);
