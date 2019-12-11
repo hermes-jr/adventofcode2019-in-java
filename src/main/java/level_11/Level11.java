@@ -6,6 +6,7 @@ import common.Point;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Level11 extends Level {
     IntComp ic;
@@ -60,12 +61,10 @@ public class Level11 extends Level {
 
     private String plateToString() {
         StringBuilder result = new StringBuilder(System.lineSeparator());
-        int minX = plate.keySet().stream().min(Comparator.comparingInt(Point::getX)).orElseThrow().getX();
-        int maxX = plate.keySet().stream().max(Comparator.comparingInt(Point::getX)).orElseThrow().getX();
-        int minY = plate.keySet().stream().min(Comparator.comparingInt(Point::getY)).orElseThrow().getY();
-        int maxY = plate.keySet().stream().max(Comparator.comparingInt(Point::getY)).orElseThrow().getY();
-        for (int i = minY; i <= maxY; i++) {
-            for (int j = maxX; j >= minX; j--) {
+        IntSummaryStatistics xStats = plate.keySet().stream().collect(Collectors.summarizingInt(Point::getX));
+        IntSummaryStatistics yStats = plate.keySet().stream().collect(Collectors.summarizingInt(Point::getY));
+        for (int i = yStats.getMin(); i <= yStats.getMax(); i++) {
+            for (int j = xStats.getMax(); j >= xStats.getMin(); j--) {
                 long pixelColor = plate.getOrDefault(new Point(j, i), 0L);
                 result.append(pixelColor == 0L ? "  " : " #");
             }
