@@ -1,32 +1,22 @@
 package level_07;
 
+import common.IntComp;
 import common.Level;
 
 import java.util.*;
 
 public class Level07 extends Level {
-    enum ReturnReason {
-        HALTED,
-        NO_INPUT
+    String initialState;
+
+    void parseData(String indata) {
+        initialState = indata;
     }
 
-    static int[] initialState;
-
-    int[] parseData(String indata) {
-        String[] tokens = indata.split(",");
-        int[] result = new int[tokens.length];
-        for (int i = 0; i < tokens.length; i++) {
-            result[i] = Integer.parseInt(tokens[i]);
-        }
-        initialState = result;
-        return result;
-    }
-
-    int p1() {
-        int maxResult = Integer.MIN_VALUE;
+    long p1() {
+        long maxResult = Long.MIN_VALUE;
 
         for (List<Integer> perm : generatePerm(new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4)))) {
-            int res = calcForPhase(new LinkedList<>(perm));
+            long res = calcForPhase(new LinkedList<>(perm));
             if (res >= maxResult) {
                 maxResult = res;
             }
@@ -34,11 +24,11 @@ public class Level07 extends Level {
         return maxResult;
     }
 
-    int p2() {
-        int maxResult = Integer.MIN_VALUE;
+    long p2() {
+        long maxResult = Integer.MIN_VALUE;
 
         for (List<Integer> perm : generatePerm(new ArrayList<>(Arrays.asList(5, 6, 7, 8, 9)))) {
-            int res = calcForPhaseCyclic(new LinkedList<>(perm));
+            long res = calcForPhaseCyclic(new LinkedList<>(perm));
             if (res >= maxResult) {
                 maxResult = res;
             }
@@ -46,20 +36,18 @@ public class Level07 extends Level {
         return maxResult;
     }
 
-    int calcForPhase(List<Integer> phase) {
-        Integer nextInput = 0;
-        Amp[] amps = new Amp[phase.size()];
+    long calcForPhase(List<Integer> phase) {
+        Long nextInput = 0L;
+        IntComp[] amps = new IntComp[phase.size()];
         for (int i = 0; i < phase.size(); i++) {
-            amps[i] = new Amp(initialState, i);
+            amps[i] = new IntComp(initialState, i);
         }
         for (int i = 0; i < phase.size(); i++) {
-            Queue<Integer> stack = new LinkedList<>();
-            stack.add(phase.get(i));
-            stack.add(nextInput);
-            amps[i].input = stack;
-            ReturnReason ampResult = amps[i].run();
-            if (ampResult.equals(ReturnReason.HALTED) && amps[i].output.peek() != null) {
-                nextInput = amps[i].output.poll();
+            amps[i].addToInput(phase.get(i));
+            amps[i].addToInput(Objects.requireNonNull(nextInput));
+            IntComp.ReturnReason ampResult = amps[i].run();
+            if (ampResult.equals(IntComp.ReturnReason.HALTED) && amps[i].getOutput().peek() != null) {
+                nextInput = amps[i].getOutput().poll();
             }
         }
         if (nextInput == null) {
@@ -68,39 +56,33 @@ public class Level07 extends Level {
         return nextInput;
     }
 
-    int calcForPhaseCyclic(List<Integer> phase) {
-        Queue<Integer> nextInput = new LinkedList<>();
-        Amp[] amps = new Amp[phase.size()];
+    Long calcForPhaseCyclic(List<Integer> phase) {
+        Queue<Long> nextInput = new LinkedList<>();
+        IntComp[] amps = new IntComp[phase.size()];
         for (int i = 0; i < phase.size(); i++) {
-            amps[i] = new Amp(initialState, i);
-            amps[i].input.add(phase.get(i));
+            amps[i] = new IntComp(initialState, i);
+            amps[i].addToInput(phase.get(i));
             if (i == 0) {
-                amps[i].input.add(0);
+                amps[i].addToInput(0);
             }
         }
         int iter = 0;
 
         while (true) {
-            Amp currentAmp = amps[iter % (phase.size())];
-            currentAmp.input.addAll(nextInput);
+            IntComp currentAmp = amps[iter % (phase.size())];
+            nextInput.forEach(currentAmp::addToInput);
             nextInput.clear();
-            ReturnReason ampResult = currentAmp.run();
+            IntComp.ReturnReason ampResult = currentAmp.run();
 
-            if (currentAmp.id + 1 == phase.size() && ampResult.equals(ReturnReason.HALTED)) {
-                if (currentAmp.output.peek() == null) {
+            if (currentAmp.getId() + 1 == phase.size() && ampResult.equals(IntComp.ReturnReason.HALTED)) {
+                if (currentAmp.getOutput().peek() == null) {
                     throw new RuntimeException("Halted on empty result. Something is wrong");
                 }
-                return currentAmp.output.poll();
+                return currentAmp.getOutput().poll();
             }
-            nextInput.addAll(currentAmp.output);
-            currentAmp.output.clear();
+            nextInput = currentAmp.getOutput();
             iter++;
         }
-    }
-
-    static int getDigitAt(int number, int pos) {
-        int abs = (number < 0) ? -number : number;
-        return pos == 0 ? abs % 100 : (abs / (int) (Math.pow(10, (pos - 1)))) % 10;
     }
 
     public <E> List<List<E>> generatePerm(List<E> original) {
@@ -125,98 +107,9 @@ public class Level07 extends Level {
     public static void main(String[] args) {
         Level07 l = new Level07();
         String in = readResourcesFirstLine(Level07.class, "input");
-        initialState = l.parseData(in);
+        l.parseData(in);
         System.out.println("Part1: " + l.p1());
         System.out.println("Part2: " + l.p2());
     }
 
-    static class Amp {
-        int[] data;
-        int id;
-        int ip = 0;
-        Queue<Integer> input = new LinkedList<>();
-        Queue<Integer> output = new LinkedList<>();
-
-        Amp(int[] initialState, int id) {
-            this.id = id;
-            this.data = Arrays.copyOf(initialState, initialState.length);
-        }
-
-        ReturnReason run() {
-            while (true) {
-                int icode = getDigitAt(data[ip], 0);
-                int[] args;
-                switch (icode) {
-                    case 1: // add
-                        args = parseArgs(ip, 3);
-                        data[args[2]] = args[0] + args[1];
-                        ip += 4;
-                        break;
-                    case 2: // mul
-                        args = parseArgs(ip, 3);
-                        data[args[2]] = args[0] * args[1];
-                        ip += 4;
-                        break;
-                    case 3: // in
-                        args = parseArgs(ip, 1);
-                        if (input.peek() == null) {
-                            return ReturnReason.NO_INPUT;
-                        }
-                        data[args[0]] = input.poll();
-                        ip += 2;
-                        break;
-                    case 4: // out
-                        args = parseArgs(ip, 1, true);
-                        output.add(args[0]);
-                        ip += 2;
-                        break;
-                    case 5: // jit
-                        args = parseArgs(ip, 2, true);
-                        if (args[0] != 0) ip = args[1];
-                        else ip += 3;
-                        break;
-                    case 6: // jif
-                        args = parseArgs(ip, 2, true);
-                        if (args[0] == 0) ip = args[1];
-                        else ip += 3;
-                        break;
-                    case 7: // lt
-                        args = parseArgs(ip, 3);
-                        data[args[2]] = (args[0] < args[1]) ? 1 : 0;
-                        ip += 4;
-                        break;
-                    case 8: // eq
-                        args = parseArgs(ip, 3);
-                        data[args[2]] = (args[0] == args[1]) ? 1 : 0;
-                        ip += 4;
-                        break;
-                    case 99:
-                        return ReturnReason.HALTED;
-                    default:
-                        throw new RuntimeException("Unknown instruction");
-                }
-            }
-        }
-
-        public int[] parseArgs(int ip, int argsLength) {
-            return parseArgs(ip, argsLength, false);
-        }
-
-        public int[] parseArgs(int ip, int argsLength, boolean jmp) {
-            int[] result = new int[argsLength];
-            for (int i = 0; i < argsLength; i++) {
-                int iMode = Level07.getDigitAt(data[ip], i + 3);
-                int aVal = data[ip + i + 1];
-                if (!jmp && i + 1 == argsLength) {
-                    result[i] = aVal;
-                } else if (iMode == 1) {
-                    result[i] = aVal;
-                } else if (iMode == 0) {
-                    result[i] = data[aVal];
-                }
-            }
-            return result;
-        }
-
-    }
 }

@@ -54,6 +54,10 @@ public class IntComp {
         this.relBase = 0L;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public enum ReturnReason {
         HALTED,
         NO_INPUT
