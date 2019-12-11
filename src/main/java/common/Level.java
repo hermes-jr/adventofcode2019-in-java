@@ -3,30 +3,33 @@ package common;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-public class Level {
-    public static String readResourcesFirstLine(Class<?> clazz, String filename) {
-        return readResources(clazz, filename).get(0);
+public abstract class Level {
+    Map<String, List<String>> cached = new HashMap<>();
+
+    public String readResourcesFirstLine(String filename) {
+        return readResources(filename).get(0);
     }
 
-    public static List<String> readResources(Class<?> clazz, String filename) {
+    public List<String> readResources(String filename) {
+        if (cached.get(filename) != null) {
+            return cached.get(filename);
+        }
         try (BufferedReader br
                      = new BufferedReader(
                 new InputStreamReader(
-                        Objects.requireNonNull(clazz.getClassLoader().getResourceAsStream("level_" + clazz.getSimpleName().substring(5) + "/" + filename))))) {
+                        Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("level_" + getClass().getSimpleName().substring(5) + "/" + filename))))) {
             List<String> result = new LinkedList<>();
             String line;
             while ((line = br.readLine()) != null) {
                 result.add(line);
             }
-            return result;
+            cached.put(filename, Collections.unmodifiableList(result));
+            return Collections.unmodifiableList(result);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Can't read resources", e);
         }
     }
-
 }

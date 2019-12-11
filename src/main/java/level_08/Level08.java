@@ -11,7 +11,7 @@ public class Level08 extends Level {
     public Level08(String filename, int w, int h) {
         this.w = w;
         this.h = h;
-        String s = readResourcesFirstLine(Level08.class, filename);
+        String s = readResourcesFirstLine(filename);
         this.data = parseData(s);
     }
 

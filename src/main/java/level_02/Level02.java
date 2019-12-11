@@ -59,7 +59,7 @@ public class Level02 extends Level {
 
     public static void main(String[] args) {
         Level02 l = new Level02();
-        int[] data = l.parseData(readResourcesFirstLine(Level02.class, "input"));
+        int[] data = l.parseData(l.readResourcesFirstLine("input"));
         System.out.println("Part1: " + l.p1(data));
         System.out.println("Part2: " + l.p2(data));
     }

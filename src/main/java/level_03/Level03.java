@@ -18,7 +18,7 @@ public class Level03 extends Level {
     }
 
     public ImmutablePair<ArrayList<Point>, ArrayList<Point>> processResource(String fname) {
-        List<String> in = readResources(Level03.class, fname);
+        List<String> in = readResources(fname);
         return ImmutablePair.of(parseLine(in.get(0)), parseLine(in.get(1)));
     }
 

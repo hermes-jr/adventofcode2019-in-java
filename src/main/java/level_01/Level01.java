@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Level01 extends Level {
-    public static void main(String[] args) {
-        List<Integer> data = readResources(Level01.class, "input").stream().map(Integer::parseInt).collect(Collectors.toList());
+    public Level01(String fname) {
+        List<Integer> data = readResources(fname).stream().map(Integer::parseInt).collect(Collectors.toList());
         int result = 0;
         for (int i : data) {
             result += step(i);
@@ -19,6 +19,10 @@ public class Level01 extends Level {
             result += recursiveStep(i);
         }
         System.out.println("Part2: " + result);
+    }
+
+    public static void main(String[] args) {
+        new Level01("input");
     }
 
     private static int recursiveStep(int a) {

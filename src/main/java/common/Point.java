@@ -26,13 +26,18 @@ public class Point implements Comparable<Point> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         Point point = (Point) o;
-        return this.x == point.x && this.y == point.y;
+
+        if (x != point.x) return false;
+        return y == point.y;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.x, this.y);
+        int result = x;
+        result = 31 * result + y;
+        return result;
     }
 
     @Override

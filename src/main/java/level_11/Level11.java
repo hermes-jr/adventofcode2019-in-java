@@ -24,7 +24,7 @@ public class Level11 extends Level {
 
     public Level11(String input) {
         initDirections();
-        prog = readResourcesFirstLine(Level11.class, input);
+        prog = readResourcesFirstLine(input);
     }
 
     public int p1() {

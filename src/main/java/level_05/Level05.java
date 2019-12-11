@@ -22,7 +22,7 @@ public class Level05 extends Level {
 
     public static void main(String[] args) {
         Level05 l = new Level05();
-        String in = readResourcesFirstLine(Level05.class, "input");
+        String in = l.readResourcesFirstLine("input");
         l.ic = new IntComp(in, 0);
         System.out.println("Part1: " + l.p1());
         l.ic = new IntComp(in, 1);

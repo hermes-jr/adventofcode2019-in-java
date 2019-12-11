@@ -15,7 +15,7 @@ public class Level10 extends Level {
     int MAX_Y;
 
     public Level10(String filename) {
-        List<String> s = readResources(Level10.class, filename);
+        List<String> s = readResources(filename);
         MAX_X = s.get(0).length();
         MAX_Y = s.size();
         asteroids = parseData(s);

@@ -96,7 +96,7 @@ class Level05 extends Level {
 
     @Test
     void testThreeOutputs() {
-        String prog = Level05.readResourcesFirstLine(Level05.class, "three_outputs");
+        String prog = readResourcesFirstLine("three_outputs");
         IntComp ic = new IntComp(prog, 0);
         assertExactOutputWithGivenInput(ic, 1L, 999L);
         assertExactOutputWithGivenInput(ic, -1L, 999L);

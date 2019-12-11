@@ -107,7 +107,7 @@ public class Level07 extends Level {
 
     public static void main(String[] args) {
         Level07 l = new Level07();
-        String in = readResourcesFirstLine(Level07.class, "input");
+        String in = l.readResourcesFirstLine("input");
         l.parseData(in);
         System.out.println("Part1: " + l.p1());
         System.out.println("Part2: " + l.p2());
