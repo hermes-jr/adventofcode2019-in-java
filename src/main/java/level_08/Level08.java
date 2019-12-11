@@ -1,11 +1,8 @@
 package level_08;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Objects;
+import common.Level;
 
-public class Level08 {
+public class Level08 extends Level {
     int[] data;
     int w;
     int h;
@@ -14,7 +11,7 @@ public class Level08 {
     public Level08(String filename, int w, int h) {
         this.w = w;
         this.h = h;
-        String s = readResources(filename);
+        String s = readResourcesFirstLine(Level08.class, filename);
         this.data = parseData(s);
     }
 
@@ -93,18 +90,6 @@ public class Level08 {
             }
         }
         return fli;
-    }
-
-    public String readResources(String filename) {
-        try (BufferedReader br
-                     = new BufferedReader(
-                new InputStreamReader(
-                        Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("level_" + getClass().getSimpleName().substring(5) + "/" + filename))))) {
-            return br.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Can't read resources", e);
-        }
     }
 
     int getDigitAt(int x, int y, int z) {
