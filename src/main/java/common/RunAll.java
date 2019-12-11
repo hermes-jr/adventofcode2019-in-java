@@ -1,9 +1,10 @@
-import java.io.IOException;
+package common;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class RunAll {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         for (int i = 1; i <= 25; i++) {
             try {
                 String levelClassName = String.format("level_%02d.Level%02d", i, i);

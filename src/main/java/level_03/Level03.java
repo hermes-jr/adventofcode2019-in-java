@@ -1,14 +1,11 @@
 package level_03;
 
-import level_01.Level01;
+import common.Level;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 
-public class Level03 {
+public class Level03 extends Level {
     public static void main(String[] args) {
         Level03 l = new Level03();
         ImmutablePair<ArrayList<Point>, ArrayList<Point>> wires = l.processResource("input");
@@ -20,15 +17,8 @@ public class Level03 {
     }
 
     public ImmutablePair<ArrayList<Point>, ArrayList<Point>> processResource(String fname) {
-        try (BufferedReader br
-                     = new BufferedReader(
-                new InputStreamReader(
-                        Objects.requireNonNull(Level01.class.getClassLoader().getResourceAsStream("level_03/" + fname))))) {
-            return ImmutablePair.of(parseLine(br.readLine()), parseLine(br.readLine()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        throw new RuntimeException("Unparseable");
+        List<String> in = readResources(Level03.class, fname);
+        return ImmutablePair.of(parseLine(in.get(0)), parseLine(in.get(1)));
     }
 
     Set<Point> findIntersections(ImmutablePair<ArrayList<Point>, ArrayList<Point>> wires) {

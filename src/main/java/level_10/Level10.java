@@ -1,15 +1,13 @@
 package level_10;
 
+import common.Level;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 
-public class Level10 {
+public class Level10 extends Level {
     final static boolean VERBOSE = false;
     List<Point> asteroids;
     SortedMap<BigDecimal, List<Point>> lines = new TreeMap<>();
@@ -17,7 +15,7 @@ public class Level10 {
     int MAX_Y;
 
     public Level10(String filename) {
-        List<String> s = readResources(filename);
+        List<String> s = readResources(Level10.class, filename);
         MAX_X = s.get(0).length();
         MAX_Y = s.size();
         asteroids = parseData(s);
@@ -95,23 +93,6 @@ public class Level10 {
             Optional<Point> result = Optional.of(line.get(targetIdx));
             line.remove(targetIdx);
             return result;
-        }
-    }
-
-    public List<String> readResources(String filename) {
-        try (BufferedReader br
-                     = new BufferedReader(
-                new InputStreamReader(
-                        Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("level_" + getClass().getSimpleName().substring(5) + "/" + filename))))) {
-            List<String> result = new LinkedList<>();
-            String line;
-            while ((line = br.readLine()) != null) {
-                result.add(line);
-            }
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Can't read resources", e);
         }
     }
 

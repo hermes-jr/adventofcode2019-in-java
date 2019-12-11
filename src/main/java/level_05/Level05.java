@@ -1,17 +1,15 @@
 package level_05;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import common.Level;
+
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 
-public class Level05 {
+public class Level05 extends Level {
     private int[] data;
 
-    int[] parseData(String indata) {
-        String[] tokens = indata.split(",");
+    int[] parseData(String in) {
+        String[] tokens = in.split(",");
         int[] result = new int[tokens.length];
         for (int i = 0; i < tokens.length; i++) {
             result[i] = Integer.parseInt(tokens[i]);
@@ -115,18 +113,6 @@ public class Level05 {
         return result;
     }
 
-    public String readResources(String filename) {
-        try (BufferedReader br
-                     = new BufferedReader(
-                new InputStreamReader(
-                        Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("level_05/" + filename))))) {
-            return br.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Can't read resources", e);
-        }
-    }
-
     static int getDigitAt(int number, int pos) {
         int abs = (number < 0) ? -number : number;
         return pos == 0 ? abs % 100 : (abs / (int) (Math.pow(10, (pos - 1)))) % 10;
@@ -134,7 +120,7 @@ public class Level05 {
 
     public static void main(String[] args) {
         Level05 l = new Level05();
-        String in = l.readResources("input");
+        String in = readResourcesFirstLine(Level05.class, "input");
         l.data = l.parseData(in);
         System.out.println("Part1: " + l.p1());
         l.data = l.parseData(in);

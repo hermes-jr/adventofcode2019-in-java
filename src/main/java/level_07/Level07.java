@@ -1,11 +1,10 @@
 package level_07;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import common.Level;
+
 import java.util.*;
 
-public class Level07 {
+public class Level07 extends Level {
     enum ReturnReason {
         HALTED,
         NO_INPUT
@@ -99,18 +98,6 @@ public class Level07 {
         }
     }
 
-    public String readResources(String filename) {
-        try (BufferedReader br
-                     = new BufferedReader(
-                new InputStreamReader(
-                        Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("level_07/" + filename))))) {
-            return br.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Can't read resources", e);
-        }
-    }
-
     static int getDigitAt(int number, int pos) {
         int abs = (number < 0) ? -number : number;
         return pos == 0 ? abs % 100 : (abs / (int) (Math.pow(10, (pos - 1)))) % 10;
@@ -137,7 +124,7 @@ public class Level07 {
 
     public static void main(String[] args) {
         Level07 l = new Level07();
-        String in = l.readResources("input");
+        String in = readResourcesFirstLine(Level07.class, "input");
         initialState = l.parseData(in);
         System.out.println("Part1: " + l.p1());
         System.out.println("Part2: " + l.p2());

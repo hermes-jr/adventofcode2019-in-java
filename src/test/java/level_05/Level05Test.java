@@ -122,7 +122,7 @@ class Level05Test {
 
     @Test
     void testThreeOutputs() {
-        String prog = l.readResources("three_outputs");
+        String prog = Level05.readResourcesFirstLine(Level05.class, "three_outputs");
         l.parseData(prog);
         assertThat(l.runProg(1)).containsExactly(999);
         assertThat(l.runProg(-1)).containsExactly(999);

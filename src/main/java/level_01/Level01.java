@@ -1,24 +1,13 @@
 package level_01;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import common.Level;
 
-public class Level01 {
-    public static void main(String[] args) throws IOException {
-        List<Integer> data = new LinkedList<>();
-        try (BufferedReader br
-                     = new BufferedReader(
-                new InputStreamReader(
-                        Objects.requireNonNull(Level01.class.getClassLoader().getResourceAsStream("level_01/input"))))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                data.add(Integer.parseInt(line));
-            }
-        }
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Level01 extends Level {
+    public static void main(String[] args) {
+        List<Integer> data = readResources(Level01.class, "input").stream().map(Integer::parseInt).collect(Collectors.toList());
         int result = 0;
         for (int i : data) {
             result += step(i);
