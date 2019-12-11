@@ -5,6 +5,7 @@ import common.Level;
 
 import java.util.*;
 
+// It used to work faster in rev.1255de643b28ab69f3c29763cd63ec0068a598c8 ¯\_(:/)_/¯
 public class Level07 extends Level {
     String initialState;
 
