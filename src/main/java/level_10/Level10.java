@@ -2,7 +2,6 @@ package level_10;
 
 import common.Level;
 import common.Point;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
