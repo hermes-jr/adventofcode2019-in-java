@@ -38,4 +38,18 @@ public class Level12Test {
         assertThat(totalEnergy).isEqualTo(179);
     }
 
+    @Test
+    void numberOfStepsToCycleShouldBeCorrect() {
+        Level12 l = new Level12("in0");
+        long steps = l.p2();
+        assertThat(steps).isEqualTo(2772);
+    }
+
+    @Test
+    void shouldBeCalculatedAnalytically() {
+        Level12 l = new Level12("in1");
+        long steps = l.p2();
+        assertThat(steps).isEqualTo(4686774924L);
+    }
+
 }
