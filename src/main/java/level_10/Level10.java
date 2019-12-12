@@ -1,7 +1,7 @@
 package level_10;
 
 import common.Level;
-import common.Point;
+import common.Point2D;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -9,8 +9,8 @@ import java.util.*;
 
 public class Level10 extends Level {
     final static boolean VERBOSE = false;
-    List<Point> asteroids;
-    SortedMap<BigDecimal, List<Point>> lines = new TreeMap<>();
+    List<Point2D> asteroids;
+    SortedMap<BigDecimal, List<Point2D>> lines = new TreeMap<>();
     int MAX_X;
     int MAX_Y;
 
@@ -25,18 +25,18 @@ public class Level10 extends Level {
         Level10 l = new Level10("input");
         int[] r1 = l.p1();
         System.out.println("Part1: " + r1[2]);
-        System.out.println("Part2: " + l.p2(new Point(r1[0], r1[1])));
+        System.out.println("Part2: " + l.p2(new Point2D(r1[0], r1[1])));
     }
 
-    List<Point> parseData(List<String> input) {
-        List<Point> result = new ArrayList<>();
+    List<Point2D> parseData(List<String> input) {
+        List<Point2D> result = new ArrayList<>();
 
         int y = 0;
         for (String line : input) {
             int x = 0;
             for (Character curChar : line.toCharArray()) {
                 if (curChar == '#') {
-                    result.add(new Point(x, y));
+                    result.add(new Point2D(x, y));
                 }
                 x++;
             }
@@ -47,17 +47,17 @@ public class Level10 extends Level {
     }
 
     int[] p1() {
-        Map<Point, Integer> data = new HashMap<>();
-        for (Point a : asteroids) {
+        Map<Point2D, Integer> data = new HashMap<>();
+        for (Point2D a : asteroids) {
             data.put(a, getSinglePointVisibleCount(a));
         }
-        Map.Entry<Point, Integer> result = data.entrySet().stream().max(Map.Entry.comparingByValue()).orElseThrow(RuntimeException::new);
+        Map.Entry<Point2D, Integer> result = data.entrySet().stream().max(Map.Entry.comparingByValue()).orElseThrow(RuntimeException::new);
         return new int[]{result.getKey().getX(), result.getKey().getY(), result.getValue()};
     }
 
-    int p2(Point vantagePoint) {
+    int p2(Point2D vantagePoint) {
         lines.clear();
-        Point result = null;
+        Point2D result = null;
         recalculateAnglesForPoint(vantagePoint);
         if (VERBOSE) System.out.println("Lines for vp: " + vantagePoint + " " + lines);
         int eliminatedAsteroids = 0;
@@ -65,9 +65,9 @@ public class Level10 extends Level {
         int revolution = -1;
         outerLoop:
         while (eliminatedAsteroids < totalFoes) {
-            for (Map.Entry<BigDecimal, List<Point>> entry : lines.entrySet()) {
+            for (Map.Entry<BigDecimal, List<Point2D>> entry : lines.entrySet()) {
                 int a = entry.getKey().compareTo(BigDecimal.ZERO) == 0 ? 1 : -1;
-                Optional<Point> point = eliminatePoint(vantagePoint, entry.getValue(), a * revolution);
+                Optional<Point2D> point = eliminatePoint(vantagePoint, entry.getValue(), a * revolution);
                 if (eliminatedAsteroids >= totalFoes) {
                     break outerLoop;
                 }
@@ -84,37 +84,37 @@ public class Level10 extends Level {
         return result.getX() * 100 + result.getY();
     }
 
-    private Optional<Point> eliminatePoint(Point self, List<Point> line, int direction) {
+    private Optional<Point2D> eliminatePoint(Point2D self, List<Point2D> line, int direction) {
         int selfIdx = line.indexOf(self);
         int targetIdx = selfIdx + direction;
         if (line.size() == 1 || targetIdx < 0 || targetIdx >= line.size()) {
             return Optional.empty();
         } else {
-            Optional<Point> result = Optional.of(line.get(targetIdx));
+            Optional<Point2D> result = Optional.of(line.get(targetIdx));
             line.remove(targetIdx);
             return result;
         }
     }
 
-    int getSinglePointVisibleCount(Point asteroid) {
+    int getSinglePointVisibleCount(Point2D asteroid) {
         return getSinglePointVisibleCount(asteroid, false);
     }
 
-    void recalculateAnglesForPoint(Point asteroid) {
+    void recalculateAnglesForPoint(Point2D asteroid) {
         getSinglePointVisibleCount(asteroid, true);
     }
 
-    int getSinglePointVisibleCount(Point asteroid, boolean updateLines) {
+    int getSinglePointVisibleCount(Point2D asteroid, boolean updateLines) {
         if (VERBOSE) System.out.println("Checking visibility for " + asteroid);
-        Set<Point> checked = new HashSet<>();
+        Set<Point2D> checked = new HashSet<>();
         int canBeSeen = 0;
-        for (Point other : asteroids) {
+        for (Point2D other : asteroids) {
             if (other.equals(asteroid) || checked.contains(other)) {
                 continue;
             }
             if (VERBOSE) System.out.println("Testing " + other + " and all on the same line of sight");
             checked.add(other);
-            List<Point> sameLine = new ArrayList<>();
+            List<Point2D> sameLine = new ArrayList<>();
             sameLine.add(asteroid);
             sameLine.add(other);
             int x1 = asteroid.getX();
@@ -126,7 +126,7 @@ public class Level10 extends Level {
             int b = x2 - x1;
             int c = x1 * y2 - x2 * y1;
             if (VERBOSE) System.out.printf("Line of sight: %sx + %sy + %s = 0%n", a, b, c);
-            for (Point yetAnother : asteroids) {
+            for (Point2D yetAnother : asteroids) {
                 if (yetAnother.equals(asteroid) || yetAnother.equals(other) || checked.contains(yetAnother)) {
                     continue;
                 }
@@ -136,7 +136,7 @@ public class Level10 extends Level {
                 }
             }
 
-            sameLine.sort(Point.POINT_COMPARATOR);
+            sameLine.sort(Point2D.POINT_COMPARATOR);
 
             if (updateLines) {
                 lines.put(BigDecimal.valueOf(getAngleFromPoint(asteroid, other)).setScale(6, RoundingMode.HALF_UP), sameLine);
@@ -162,11 +162,11 @@ public class Level10 extends Level {
     }
 
     // (y1 - y2) x + (x2 - x1) y + (x1y2 - x2y1) = 0
-    boolean isOnSameLine(int a, int b, int c, Point p) {
+    boolean isOnSameLine(int a, int b, int c, Point2D p) {
         return a * p.getX() + b * p.getY() + c == 0;
     }
 
-    public double getAngleFromPoint(Point firstPoint, Point secondPoint) {
+    public double getAngleFromPoint(Point2D firstPoint, Point2D secondPoint) {
         if ((secondPoint.getX() > firstPoint.getX())) {
             return (Math.atan2((secondPoint.getX() - firstPoint.getX()), (firstPoint.getY() - secondPoint.getY())) * 180 / Math.PI);
         } else if ((secondPoint.getX() < firstPoint.getX())) {
