@@ -2,6 +2,7 @@ package level_12;
 
 import common.Point3D;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -25,19 +26,13 @@ public class Level12Test {
     }
 
     @Test
-    void expectSimulationToWorkProperly() {
-        Level12 l = new Level12("in0");
-        assertThat(l.moons).hasSize(4);
-        // ? for each step expect trimmed moon.toString to be equal to given string, also trimmed of spaces
-    }
-
-    @Test
     void expectCorrectTotalEnergyInTenSteps() {
         Level12 l = new Level12("in0");
         long totalEnergy = l.p1(10);
         assertThat(totalEnergy).isEqualTo(179);
     }
 
+    @Timeout(30)
     @Test
     void numberOfStepsToCycleShouldBeCorrect() {
         Level12 l = new Level12("in0");
@@ -45,6 +40,7 @@ public class Level12Test {
         assertThat(steps).isEqualTo(2772);
     }
 
+    @Timeout(30)
     @Test
     void shouldBeCalculatedAnalytically() {
         Level12 l = new Level12("in1");

@@ -4,7 +4,8 @@ import common.Level;
 import common.Point3D;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 public class Level12 extends Level {
     final static AtomicInteger moonCounter = new AtomicInteger(0);
     final Pattern coordinatesPattern = Pattern.compile("^<x=(-?[0-9]+), y=(-?[0-9]+), z=(-?[0-9]+)>$");
-    List<Moon> moons = new LinkedList<>();
+    List<Moon> moons = new ArrayList<>();
 
     public Level12(String input) {
         for (String s : readResources(input)) {
@@ -40,40 +41,46 @@ public class Level12 extends Level {
     }
 
     public long p2() {
-        Map<Integer, Set<String>> seenStates = new HashMap<>();
-        Map<Integer, Long> cycleDetected = new HashMap<>();
+        int xrep = 0;
+        int yrep = 0;
+        int zrep = 0;
+        String xState = moons.stream().map(z -> z.getPosition().getX() + "," + z.getVelocity().getX()).collect(Collectors.joining(","));
+        String yState = moons.stream().map(z -> z.getPosition().getY() + "," + z.getVelocity().getY()).collect(Collectors.joining(","));
+        String zState = moons.stream().map(z -> z.getPosition().getZ() + "," + z.getVelocity().getZ()).collect(Collectors.joining(","));
 
-        for (Moon m : moons) {
-            seenStates.put(m.id, new HashSet<>());
-        }
-
-        outerLoop:
-        for (long steps = 0; ; steps++) {
-            for (Moon m : moons) {
-                if (cycleDetected.containsKey(m.id)) {
-                    continue;
-                }
-                String currentMoonState = m.toString();
-                if (seenStates.get(m.id).contains(currentMoonState)) {
-                    cycleDetected.put(m.id, steps - 1);
-                    if (cycleDetected.size() == moons.size()) {
-                        break outerLoop;
-                    }
-                }
-                seenStates.get(m.id).add(currentMoonState);
-            }
+        int steps = 0;
+        while (true) {
             doStep();
+            steps++;
+            if (xrep != 0 && yrep != 0 && zrep != 0) {
+                break;
+            }
+            if (xrep == 0 && xState.equals(moons.stream().map(z -> z.getPosition().getX() + "," + z.getVelocity().getX()).collect(Collectors.joining(",")))) {
+                xrep = steps;
+            }
+            if (yrep == 0 && yState.equals(moons.stream().map(z -> z.getPosition().getY() + "," + z.getVelocity().getY()).collect(Collectors.joining(",")))) {
+                yrep = steps;
+            }
+            if (zrep == 0 && zState.equals(moons.stream().map(z -> z.getPosition().getZ() + "," + z.getVelocity().getZ()).collect(Collectors.joining(",")))) {
+                zrep = steps;
+            }
         }
-        System.out.println("All cycles detected: " + cycleDetected);
-        // 79638,108178,217578,95342 ; LCM(79638, 108178, 217578, 95342) = 572801223525480222
-        // 79639,108179,217579,95343
+        return lcm(xrep, lcm(yrep, zrep));
+    }
 
-        long c0 = cycleDetected.get(0);
-        long c1 = cycleDetected.get(1);
-        long c2 = cycleDetected.get(2);
-        long c3 = cycleDetected.get(3);
-        //long lcm = lcm(c0, c1, c2, c3); // doesn't work... damn
-        return -1;
+    public static long lcm(long number1, long number2) {
+        if (number1 == 0 || number2 == 0) {
+            return 0;
+        }
+        long absNumber1 = Math.abs(number1);
+        long absNumber2 = Math.abs(number2);
+        long absHigherNumber = Math.max(absNumber1, absNumber2);
+        long absLowerNumber = Math.min(absNumber1, absNumber2);
+        long lcm = absHigherNumber;
+        while (lcm % absLowerNumber != 0) {
+            lcm += absHigherNumber;
+        }
+        return lcm;
     }
 
     private void doStep() {
@@ -114,8 +121,8 @@ public class Level12 extends Level {
 
     public static void main(String[] args) {
         Level12 l = new Level12("input");
-//        System.out.println("Part1: " + l.p1(1000));
-//        l = new Level12("input");
+        System.out.println("Part1: " + l.p1(1000));
+        l = new Level12("input"); // 282399002133976
         System.out.println("Part2: " + l.p2());
     }
 
