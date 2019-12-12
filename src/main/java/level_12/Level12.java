@@ -121,9 +121,9 @@ public class Level12 extends Level {
 
     public static void main(String[] args) {
         Level12 l = new Level12("input");
-        System.out.println("Part1: " + l.p1(1000));
-        l = new Level12("input"); // 282399002133976
-        System.out.println("Part2: " + l.p2());
+        System.out.println("Part1: " + l.p1(1000)); // 9999
+        l = new Level12("input");
+        System.out.println("Part2: " + l.p2()); // 282399002133976
     }
 
     static class Moon {
