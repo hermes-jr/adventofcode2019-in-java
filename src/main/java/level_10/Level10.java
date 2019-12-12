@@ -139,7 +139,7 @@ public class Level10 extends Level {
             sameLine.sort(Point2D.POINT_COMPARATOR);
 
             if (updateLines) {
-                lines.put(BigDecimal.valueOf(getAngleFromPoint(asteroid, other)).setScale(6, RoundingMode.HALF_UP), sameLine);
+                lines.put(BigDecimal.valueOf(getAngleFromPoint(x1, y1, x2, y2)).setScale(4, RoundingMode.HALF_UP), sameLine);
             }
 
             if (sameLine.size() > 2) {
@@ -166,13 +166,13 @@ public class Level10 extends Level {
         return a * p.getX() + b * p.getY() + c == 0;
     }
 
-    public double getAngleFromPoint(Point2D firstPoint, Point2D secondPoint) {
-        if ((secondPoint.getX() > firstPoint.getX())) {
-            return (Math.atan2((secondPoint.getX() - firstPoint.getX()), (firstPoint.getY() - secondPoint.getY())) * 180 / Math.PI);
-        } else if ((secondPoint.getX() < firstPoint.getX())) {
-            return 360 - (Math.atan2((firstPoint.getX() - secondPoint.getX()), (firstPoint.getY() - secondPoint.getY())) * 180 / Math.PI);
+    public double getAngleFromPoint(int x1, int y1, int x2, int y2) {
+        if (x2 > x1) {
+            return Math.toDegrees(Math.atan2(x2 - x1, y1 - y2));
+        } else if (x2 < x1) {
+            return Math.toDegrees(2.0 * Math.PI - Math.atan2(x1 - x2, y1 - y2));
         }
-        return Math.atan2(0, 0);
+        return 0.0;
     }
 
 }
