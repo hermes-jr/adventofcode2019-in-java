@@ -13,15 +13,11 @@ import java.util.Map;
 public class Level14 extends Level {
     Map<String, Reaction> knownReactions = new HashMap<>();
     Map<String, Long> warehouse = new HashMap<>();
-    final long INITIAL_ORE = Long.MAX_VALUE;
     final long ORE_LIMIT = 1000000000000L;
 
     Level14(String filename) {
-        warehouse.put("ORE", INITIAL_ORE); // :-)
-
         List<String> in = readResources(filename);
         for (String s : in) {
-            // 5 VJHF, 7 MNCFX, 9 VPVL, 37 CXFTF => 6 GNMV
             Map<String, Integer> requirements = new HashMap<>();
             String[] reaction = s.split(" => ");
             for (String r : reaction[0].split(", ")) {
@@ -33,47 +29,54 @@ public class Level14 extends Level {
         }
     }
 
+    long p1() {
+        return create("FUEL", 1L);
+    }
+
+    long p2(long orePerFuel) {
+        long low = ORE_LIMIT / orePerFuel;
+        return binarySearch(low, low * 2);
+    }
+
     public static void main(String[] args) {
         Level14 l = new Level14("input");
-        long orePerFuel = l.p1(1);
+        long orePerFuel = l.p1();
         System.out.println("Part1: " + orePerFuel);
         System.out.println("Part2: " + l.p2(orePerFuel));
     }
 
-    int p2(long sux) {
-        warehouse.put("ORE", ORE_LIMIT); // :-)
-        int f = 0;
-        while (warehouse.get("ORE") >= 0L) {
-            create("FUEL", 1);
-            f++;
-            warehouse.put("FUEL", 0L); // don't reuse
-            if (f % 10000 == 0) System.out.println(warehouse.get("ORE"));
+    private long binarySearch(long low, long high) {
+        if (high >= low) {
+            long mid = low + (high - low) / 2;
+            long oreRequired = create("FUEL", mid);
+            if (oreRequired == ORE_LIMIT)
+                return mid;
+            if (oreRequired > ORE_LIMIT)
+                return binarySearch(low, mid - 1);
+            return binarySearch(mid + 1, high);
         }
-//        long gg = ORE_LIMIT / sux;
-//        System.out.println(p1((lint) gg));
-        return f - 1;
+        return low - 1;
     }
 
-    long p1(int num) {
-        create("FUEL", num);
-        return INITIAL_ORE - warehouse.get("ORE");
-    }
-
-    private void create(String chemical, int required) {
-        long inStock = warehouse.getOrDefault(chemical, 0L);
+    private long create(String chemical, long required) {
+        if ("FUEL".equals(chemical)) {
+            warehouse.clear();
+        }
         if ("ORE".equals(chemical)) {
-            return;
+            return required;
         }
-        while (inStock < required) {
-            Reaction reaction = knownReactions.get(chemical);
-            for (Map.Entry<String, Integer> req : reaction.getRequirements().entrySet()) {
-                create(req.getKey(), req.getValue());
-                warehouse.put(req.getKey(), warehouse.getOrDefault(req.getKey(), 0L) - req.getValue());
-            }
-            // Add reaction result to warehouse
-            inStock += reaction.quantity;
-            warehouse.put(chemical, inStock);
+        Reaction reaction = knownReactions.get(chemical);
+        long toCreate = required - warehouse.getOrDefault(chemical, 0L);
+        if (toCreate < 1) {
+            return 0L; // served from warehouse
         }
+        long batchSize = (long) Math.ceil(toCreate / (double) reaction.getQuantity());
+        for (Map.Entry<String, Integer> req : reaction.getRequirements().entrySet()) {
+            create(req.getKey(), req.getValue() * batchSize);
+            warehouse.put(req.getKey(), warehouse.getOrDefault(req.getKey(), 0L) - req.getValue() * batchSize);
+        }
+        warehouse.put(chemical, warehouse.getOrDefault(chemical, 0L) + reaction.getQuantity() * batchSize);
+        return Math.abs(warehouse.get("ORE"));
     }
 
     @Data

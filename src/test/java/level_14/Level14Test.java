@@ -17,7 +17,7 @@ public class Level14Test {
     })
     void requiredOreForSingleFuelShouldBeCalculated(String filename, int expectedResult) {
         Level14 l = new Level14(filename);
-        assertThat(l.p1(1)).isEqualTo(expectedResult);
+        assertThat(l.p1()).isEqualTo(expectedResult);
     }
 
     @ParameterizedTest
