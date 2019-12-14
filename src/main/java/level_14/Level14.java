@@ -12,10 +12,12 @@ import java.util.Map;
 
 public class Level14 extends Level {
     Map<String, Reaction> knownReactions = new HashMap<>();
-    Map<String, Integer> warehouse = new HashMap<>();
+    Map<String, Long> warehouse = new HashMap<>();
+    final long INITIAL_ORE = Long.MAX_VALUE;
+    final long ORE_LIMIT = 1000000000000L;
 
     Level14(String filename) {
-        warehouse.put("ORE", Integer.MAX_VALUE); // :-)
+        warehouse.put("ORE", INITIAL_ORE); // :-)
 
         List<String> in = readResources(filename);
         for (String s : in) {
@@ -33,22 +35,40 @@ public class Level14 extends Level {
 
     public static void main(String[] args) {
         Level14 l = new Level14("input");
-        int orePerFuel = l.p1();
+        long orePerFuel = l.p1(1);
         System.out.println("Part1: " + orePerFuel);
+        System.out.println("Part2: " + l.p2(orePerFuel));
     }
 
-    int p1() {
-        create("FUEL", 1);
-        return Integer.MAX_VALUE - warehouse.get("ORE");
+    int p2(long sux) {
+        warehouse.put("ORE", ORE_LIMIT); // :-)
+        int f = 0;
+        while (warehouse.get("ORE") >= 0L) {
+            create("FUEL", 1);
+            f++;
+            warehouse.put("FUEL", 0L); // don't reuse
+            if (f % 10000 == 0) System.out.println(warehouse.get("ORE"));
+        }
+//        long gg = ORE_LIMIT / sux;
+//        System.out.println(p1((lint) gg));
+        return f - 1;
+    }
+
+    long p1(int num) {
+        create("FUEL", num);
+        return INITIAL_ORE - warehouse.get("ORE");
     }
 
     private void create(String chemical, int required) {
-        int inStock = warehouse.getOrDefault(chemical, 0);
+        long inStock = warehouse.getOrDefault(chemical, 0L);
+        if ("ORE".equals(chemical)) {
+            return;
+        }
         while (inStock < required) {
             Reaction reaction = knownReactions.get(chemical);
             for (Map.Entry<String, Integer> req : reaction.getRequirements().entrySet()) {
                 create(req.getKey(), req.getValue());
-                warehouse.put(req.getKey(), warehouse.getOrDefault(req.getKey(), 0) - req.getValue());
+                warehouse.put(req.getKey(), warehouse.getOrDefault(req.getKey(), 0L) - req.getValue());
             }
             // Add reaction result to warehouse
             inStock += reaction.quantity;

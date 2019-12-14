@@ -13,11 +13,22 @@ public class Level14Test {
             "in1,165",
             "in2,13312",
             "in3,180697",
-            "in4,2210736",
+            "in4,2210736"
     })
-    void energiesShouldBeCalculatedProperly(String filename, int expectedResult) {
+    void requiredOreForSingleFuelShouldBeCalculated(String filename, int expectedResult) {
         Level14 l = new Level14(filename);
-        assertThat(l.p1()).isEqualTo(expectedResult);
+        assertThat(l.p1(1)).isEqualTo(expectedResult);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "in4,2210736,460664",
+            "in2,13312,82892753",
+            "in3,180697,5586022"
+    })
+    void totalFuelCapacityShouldBeCalculated(String filename, int opf, int expectedResult) {
+        Level14 l = new Level14(filename);
+        assertThat(l.p2(opf)).isEqualTo(expectedResult);
     }
 
 }
