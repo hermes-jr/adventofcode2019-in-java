@@ -11,6 +11,7 @@ import org.jgrapht.graph.SimpleGraph;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// Solution relies on luck (especially the second part). Bot moves randomly
 public class Level15 extends Level {
     IntComp ic;
     SimpleGraph<Point2D, DefaultEdge> g = new SimpleGraph<>(DefaultEdge.class);
@@ -28,6 +29,31 @@ public class Level15 extends Level {
                 new DijkstraShortestPath<>(g);
         ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultEdge> iPath = dijkstraAlg.getPaths(oxygen);
         return iPath.getPath(Point2D.ZERO).getLength();
+    }
+
+    public int p2() {
+        int maxRadiusFromOxygen = 0;
+
+        // In seven attempts we will probably reach the furthest point from oxygen. If lucky enough
+        for (int i = 0; i < 7; i++) {
+            ic.reset();
+            g = new SimpleGraph<>(DefaultEdge.class);
+            oxygen = null;
+            bot = Point2D.ZERO;
+            scan();
+
+            DijkstraShortestPath<Point2D, DefaultEdge> dijkstraAlg =
+                    new DijkstraShortestPath<>(g);
+            ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultEdge> iPath = dijkstraAlg.getPaths(oxygen);
+            for (Point2D v : g.vertexSet()) {
+                int len = iPath.getPath(v).getLength();
+                if (len > maxRadiusFromOxygen) {
+                    maxRadiusFromOxygen = len;
+                }
+            }
+        }
+        if (VERBOSE) renderScreen();
+        return maxRadiusFromOxygen;
     }
 
     void scan() {
@@ -54,8 +80,6 @@ public class Level15 extends Level {
                 default:
                     throw new RuntimeException("Unexpected response from bot");
             }
-
-//            renderScreen();
         }
     }
 
@@ -102,6 +126,7 @@ public class Level15 extends Level {
         Level15 l = new Level15("input");
         l.scan();
         System.out.println("Part1: " + l.p1());
+        System.out.println("Part2: " + l.p2());
     }
 
 }
