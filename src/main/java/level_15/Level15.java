@@ -9,7 +9,6 @@ import lombok.SneakyThrows;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// Solution relies on luck (especially the second part). Bot moves randomly
 public class Level15 extends Level {
     static final int UP = 1;
     static final int DOWN = 2;
@@ -22,12 +21,11 @@ public class Level15 extends Level {
     private Set<Point2D> visited = new HashSet<>();
     private Set<Point2D> walls = new HashSet<>();
     boolean firstVisit = true;
-    private final boolean VERBOSE = false;
-
+    private final static boolean VERBOSE = false;
 
     public Level15(String input) {
-        String prog = readResourcesFirstLine(input);
-        bot = new Bot(prog);
+        String program = readResourcesFirstLine(input);
+        bot = new Bot(program);
     }
 
     int p1() {
@@ -45,12 +43,24 @@ public class Level15 extends Level {
     int p2() {
         Stack<Point2D> path = new Stack<>();
         visited.clear();
+        walls.clear();
         path.push(bot.getLocation());
         firstVisit = true;
         dfs(path, 2);
         return maxPathFromOx;
     }
 
+    /**
+     * At each step bot pokes adjacent cells to scan for possible paths, marks walls as visited.
+     * After that, it moves as deep as possible in each direction. For part 1 the loop is broken as
+     * soon as oxygen found. Then visited points are cleared and the whole map is explored to find
+     * the furthest location.
+     *
+     * @param stack Path from starting point to current location
+     * @param part  Part of the puzzle, 1 or 2
+     * @throws InterruptedException In part 1 exits the recursion when oxygen found.
+     *                              It was easier to break recursion this way
+     */
     void dfs(Stack<Point2D> stack, int part) throws InterruptedException {
         if (stack.isEmpty()) {
             if (VERBOSE) System.out.println("All points visited");
@@ -63,7 +73,7 @@ public class Level15 extends Level {
         } else if (part == 2 && stack.size() > maxPathFromOx) {
             maxPathFromOx = stack.size();
         }
-        visited.add(toExplore); // explored point cell and all neighbors
+        visited.add(toExplore); // Never re-visit this point unless returning
         if (VERBOSE) System.out.println("To explore: " + toExplore + ", stack: " + stack);
         if (!firstVisit) {
             bot.move(pointsToDirection(bot.location, toExplore));
@@ -83,7 +93,7 @@ public class Level15 extends Level {
             dfs(stack, part);
         }
         if (stack.size() > 1) {
-            // discard point
+            // Discard current point from path and move one step back
             stack.pop();
             bot.move(pointsToDirection(bot.location, stack.peek()));
             if (VERBOSE) renderScreen();
@@ -105,23 +115,23 @@ public class Level15 extends Level {
 
     private void renderScreen() {
         StringBuilder result = new StringBuilder(System.lineSeparator());
-        Map<Point2D, Character> renderableMap = new HashMap<>();
-        visited.forEach(z -> renderableMap.put(z, '.'));
-        walls.forEach(z -> renderableMap.put(z, '#'));
+        Map<Point2D, Character> mapToRender = new HashMap<>();
+        visited.forEach(z -> mapToRender.put(z, '.'));
+        walls.forEach(z -> mapToRender.put(z, '#'));
         if (bot.getOxygenLocation() != null) {
-            renderableMap.put(bot.getOxygenLocation(), 'o');
+            mapToRender.put(bot.getOxygenLocation(), 'o');
         }
-        renderableMap.put(Point2D.ZERO, '*');
+        mapToRender.put(Point2D.ZERO, '*');
         if (!bot.getLocation().equals(bot.getOxygenLocation())) {
-            renderableMap.put(bot.getLocation(), '@');
+            mapToRender.put(bot.getLocation(), '@');
         } else {
-            renderableMap.put(bot.getLocation(), '8');
+            mapToRender.put(bot.getLocation(), '8');
         }
-        IntSummaryStatistics xStats = renderableMap.keySet().stream().collect(Collectors.summarizingInt(Point2D::getX));
-        IntSummaryStatistics yStats = renderableMap.keySet().stream().collect(Collectors.summarizingInt(Point2D::getY));
+        IntSummaryStatistics xStats = mapToRender.keySet().stream().collect(Collectors.summarizingInt(Point2D::getX));
+        IntSummaryStatistics yStats = mapToRender.keySet().stream().collect(Collectors.summarizingInt(Point2D::getY));
         for (int i = yStats.getMin(); i <= yStats.getMax(); i++) {
             for (int j = xStats.getMin(); j <= xStats.getMax(); j++) {
-                result.append(renderableMap.getOrDefault(new Point2D(j, i), ' '));
+                result.append(mapToRender.getOrDefault(new Point2D(j, i), ' '));
             }
             result.append(System.lineSeparator());
         }
@@ -145,7 +155,7 @@ public class Level15 extends Level {
             case RIGHT:
                 return LEFT;
         }
-        throw new RuntimeException("Unknown direction");
+        throw new RuntimeException("Unknown direction: " + direction);
     }
 
     private int pointsToDirection(Point2D from, Point2D to) {
@@ -163,7 +173,7 @@ public class Level15 extends Level {
                 return DOWN;
             }
         }
-        System.out.println("Bad point at " + from + " -> " + to);
+        System.err.println("Impossible movement requested: " + from + " -> " + to);
         return result;
     }
 
@@ -178,7 +188,7 @@ public class Level15 extends Level {
             case RIGHT: // e
                 return new Point2D(bot.getX() + 1, bot.getY());
             default:
-                throw new RuntimeException("Unknown direction");
+                throw new RuntimeException("Unknown direction: " + direction);
         }
     }
 
@@ -189,12 +199,12 @@ public class Level15 extends Level {
         @Getter
         Point2D oxygenLocation;
 
-        Bot(String prog) {
-            ic = new IntComp(prog, 0);
+        Bot(String program) {
+            ic = new IntComp(program, 0);
         }
 
         /**
-         * Investigate direction and return
+         * Investigate direction and return back if actually moved
          *
          * @param direction which direction to poke
          * @return false if wall, true if hallway
@@ -207,6 +217,12 @@ public class Level15 extends Level {
             return moved;
         }
 
+        /**
+         * Move bot in required direction, reporting it movement was successful
+         *
+         * @param direction UP, DOWN, LEFT, RIGHT
+         * @return true if moved, false if stumbled upon the wall
+         */
         boolean move(int direction) {
             Point2D nextPossiblePoint = getNextPoint(location, direction);
             ic.addToInput(direction);
@@ -224,9 +240,8 @@ public class Level15 extends Level {
                     location = nextPossiblePoint;
                     return true;
                 default:
-                    throw new RuntimeException("Unexpected response from bot");
+                    throw new RuntimeException("Unexpected response from bot: " + o);
             }
-
         }
     }
 }
