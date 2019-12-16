@@ -66,6 +66,22 @@ public class Level16Test {
     }
 
     @Test
+    void testPartialSumSecondHalf() {
+        int[] data = new int[]{1, 2, 3, 4, 5, 1, 6, 7, 8};
+        int halfway = data.length / 2;
+        int iter = 100;
+        while (iter-- > 0) {
+            int cs = 0;
+            for (int n = data.length - 1; n > halfway; n--) {
+                cs = (data[n] + cs) % 10;
+                data[n] = cs;
+            }
+//            System.out.println(Arrays.toString(data));
+        }
+        assertThat(data).endsWith(1, 6, 7, 8);
+    }
+
+    @Test
     void testWithOffsets() {
         int[] data = l.parseString("03036732577212944063491565474664");
         assertThat(l.p2(data, 303673)).isEqualTo("84462026");

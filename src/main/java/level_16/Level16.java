@@ -2,13 +2,8 @@ package level_16;
 
 import common.Level;
 
-import java.util.Arrays;
-
 public class Level16 extends Level {
     final static int[] iv = new int[]{0, 1, 0, -1};
-
-    public Level16() {
-    }
 
     int[] parseString(String input) {
         char[] chars = input.toCharArray();
@@ -37,22 +32,28 @@ public class Level16 extends Level {
         for (int n = 0; n < 10_000 * data.length; n++) {
             bd[n] = data[n % data.length];
         }
+        data = bd;
 
-        fft(bd, 100);
-        return getWithOffset(bd, offset);
+        int halfway = data.length / 2;
+        int iter = 100;
+        while (iter-- > 0) {
+            int cs = 0;
+            for (int n = data.length - 1; n > halfway; n--) {
+                cs = (data[n] + cs) % 10;
+                data[n] = cs;
+            }
+        }
+
+        return getWithOffset(data, offset);
     }
 
     void fft(int[] data, int round) {
         if (round == 0) {
             return;
         }
-        int[] prevState = Arrays.copyOf(data, data.length);
-        // transform
         for (int i = 0; i < data.length; i++) {
-            data[i] = getElement(prevState, i);
+            data[i] = getElement(data, i);
         }
-//        System.out.println("ROUND: " + round);
-//        System.out.println(Arrays.toString(data));
 
         fft(data, --round);
     }
@@ -75,9 +76,10 @@ public class Level16 extends Level {
         Level16 l = new Level16();
 
         String in = l.readResourcesFirstLine("input");
-        int offset = Integer.parseInt(in.substring(0, 7));
         System.out.println("Part1: " + l.p1(l.parseString(in)));
-//        System.out.println("Part2: " + l.p2(l.parseString(in), offset));
+
+        int offset = Integer.parseInt(in.substring(0, 7));
+        System.out.println("Part2: " + l.p2(l.parseString(in), offset));
     }
 
 }
