@@ -3,119 +3,125 @@ package level_15;
 import common.IntComp;
 import common.Level;
 import common.Point2D;
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleGraph;
+import lombok.Getter;
+import lombok.SneakyThrows;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 // Solution relies on luck (especially the second part). Bot moves randomly
 public class Level15 extends Level {
-    IntComp ic;
-    SimpleGraph<Point2D, DefaultEdge> g = new SimpleGraph<>(DefaultEdge.class);
-    Point2D bot = Point2D.ZERO;
-    Point2D oxygen;
+    static final int UP = 1;
+    static final int DOWN = 2;
+    static final int LEFT = 3;
+    static final int RIGHT = 4;
+
+    int oxDistanceFromStart = 0;
+    int maxPathFromOx = 0;
+    private Bot bot;
+    private Set<Point2D> visited = new HashSet<>();
+    private Set<Point2D> walls = new HashSet<>();
+    boolean firstVisit = true;
     private final boolean VERBOSE = false;
+
 
     public Level15(String input) {
         String prog = readResourcesFirstLine(input);
-        ic = new IntComp(prog, 0);
+        bot = new Bot(prog);
     }
 
-    public int p1() {
-        DijkstraShortestPath<Point2D, DefaultEdge> dijkstraAlg =
-                new DijkstraShortestPath<>(g);
-        ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultEdge> iPath = dijkstraAlg.getPaths(oxygen);
-        return iPath.getPath(Point2D.ZERO).getLength();
-    }
-
-    public int p2() {
-        int maxRadiusFromOxygen = 0;
-
-        // In seven attempts we will probably reach the furthest point from oxygen. If lucky enough
-        for (int i = 0; i < 7; i++) {
-            ic.reset();
-            g = new SimpleGraph<>(DefaultEdge.class);
-            oxygen = null;
-            bot = Point2D.ZERO;
-            scan();
-
-            DijkstraShortestPath<Point2D, DefaultEdge> dijkstraAlg =
-                    new DijkstraShortestPath<>(g);
-            ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultEdge> iPath = dijkstraAlg.getPaths(oxygen);
-            for (Point2D v : g.vertexSet()) {
-                int len = iPath.getPath(v).getLength();
-                if (len > maxRadiusFromOxygen) {
-                    maxRadiusFromOxygen = len;
-                }
-            }
+    int p1() {
+        Stack<Point2D> path = new Stack<>();
+        path.push(bot.getLocation());
+        try {
+            dfs(path, 1);
+        } catch (InterruptedException e) {
+            return oxDistanceFromStart;
         }
-        if (VERBOSE) renderScreen();
-        return maxRadiusFromOxygen;
+        return -1;
     }
 
-    void scan() {
-        g.addVertex(Point2D.ZERO);
-        Random rnd = new Random();
+    @SneakyThrows
+    int p2() {
+        Stack<Point2D> path = new Stack<>();
+        visited.clear();
+        path.push(bot.getLocation());
+        firstVisit = true;
+        dfs(path, 2);
+        return maxPathFromOx;
+    }
 
-        while (oxygen == null) {
-            int direction = rnd.nextInt(4) + 1;
-            Point2D nextPossiblePoint = getNextPoint(bot, direction);
-            ic.addToInput(direction);
-            ic.run();
-            Queue<Long> out = ic.getOutput();
-            int o = Objects.requireNonNull(out.poll()).intValue();
-            switch (o) {
-                case 0: // wall
-                    break;
-                case 2: // moved, found oxygen
-                    oxygen = nextPossiblePoint;
-                case 1: // moved
-                    g.addVertex(nextPossiblePoint);
-                    g.addEdge(bot, nextPossiblePoint);
-                    bot = nextPossiblePoint;
-                    break;
-                default:
-                    throw new RuntimeException("Unexpected response from bot");
-            }
+    void dfs(Stack<Point2D> stack, int part) throws InterruptedException {
+        if (stack.isEmpty()) {
+            if (VERBOSE) System.out.println("All points visited");
+            return;
+        }
+        Point2D toExplore = stack.peek();
+        if (part == 1 && bot.getOxygenLocation() != null && oxDistanceFromStart == 0) {
+            oxDistanceFromStart = stack.size() - 1;
+            throw new InterruptedException();
+        } else if (part == 2 && stack.size() > maxPathFromOx) {
+            maxPathFromOx = stack.size();
+        }
+        visited.add(toExplore); // explored point cell and all neighbors
+        if (VERBOSE) System.out.println("To explore: " + toExplore + ", stack: " + stack);
+        if (!firstVisit) {
+            bot.move(pointsToDirection(bot.location, toExplore));
+            if (VERBOSE) renderScreen();
+        }
+        firstVisit = false;
+
+        // Discover options first
+        List<Point2D> adjacent = new ArrayList<>();
+        markAsVisitedOrAddToAdjacent(adjacent, UP);
+        markAsVisitedOrAddToAdjacent(adjacent, DOWN);
+        markAsVisitedOrAddToAdjacent(adjacent, LEFT);
+        markAsVisitedOrAddToAdjacent(adjacent, RIGHT);
+        // Explore them
+        for (Point2D np : adjacent) {
+            stack.push(np);
+            dfs(stack, part);
+        }
+        if (stack.size() > 1) {
+            // discard point
+            stack.pop();
+            bot.move(pointsToDirection(bot.location, stack.peek()));
+            if (VERBOSE) renderScreen();
         }
     }
 
-    private Point2D getNextPoint(Point2D bot, int direction) {
-        switch (direction) {
-            case 1: // n
-                return new Point2D(bot.getX(), bot.getY() - 1);
-            case 2: // s
-                return new Point2D(bot.getX(), bot.getY() + 1);
-            case 3: // w
-                return new Point2D(bot.getX() - 1, bot.getY());
-            case 4: // e
-                return new Point2D(bot.getX() + 1, bot.getY());
-            default:
-                throw new RuntimeException("Unknown direction");
+    private void markAsVisitedOrAddToAdjacent(List<Point2D> adjacent, int direction) {
+        Point2D np = getNextPoint(bot.getLocation(), direction);
+        if (visited.contains(np)) {
+            return;
+        }
+        if (bot.poke(direction)) {
+            adjacent.add(np);
+        } else {
+            walls.add(np);
+            visited.add(np);
         }
     }
 
     private void renderScreen() {
         StringBuilder result = new StringBuilder(System.lineSeparator());
         Map<Point2D, Character> renderableMap = new HashMap<>();
-        g.vertexSet().forEach(z -> renderableMap.put(z, '.'));
-        if (oxygen != null) {
-            renderableMap.put(oxygen, 'o');
+        visited.forEach(z -> renderableMap.put(z, '.'));
+        walls.forEach(z -> renderableMap.put(z, '#'));
+        if (bot.getOxygenLocation() != null) {
+            renderableMap.put(bot.getOxygenLocation(), 'o');
         }
         renderableMap.put(Point2D.ZERO, '*');
-        if (!bot.equals(oxygen)) {
-            renderableMap.put(bot, '@');
+        if (!bot.getLocation().equals(bot.getOxygenLocation())) {
+            renderableMap.put(bot.getLocation(), '@');
         } else {
-            renderableMap.put(bot, '8');
+            renderableMap.put(bot.getLocation(), '8');
         }
         IntSummaryStatistics xStats = renderableMap.keySet().stream().collect(Collectors.summarizingInt(Point2D::getX));
         IntSummaryStatistics yStats = renderableMap.keySet().stream().collect(Collectors.summarizingInt(Point2D::getY));
         for (int i = yStats.getMin(); i <= yStats.getMax(); i++) {
             for (int j = xStats.getMin(); j <= xStats.getMax(); j++) {
-                result.append(renderableMap.getOrDefault(new Point2D(j, i), '#'));
+                result.append(renderableMap.getOrDefault(new Point2D(j, i), ' '));
             }
             result.append(System.lineSeparator());
         }
@@ -124,9 +130,103 @@ public class Level15 extends Level {
 
     public static void main(String[] args) {
         Level15 l = new Level15("input");
-        l.scan();
         System.out.println("Part1: " + l.p1());
         System.out.println("Part2: " + l.p2());
     }
 
+    int inverse(int direction) {
+        switch (direction) {
+            case UP:
+                return DOWN;
+            case DOWN:
+                return UP;
+            case LEFT:
+                return RIGHT;
+            case RIGHT:
+                return LEFT;
+        }
+        throw new RuntimeException("Unknown direction");
+    }
+
+    private int pointsToDirection(Point2D from, Point2D to) {
+        int result = 0;
+        if (from.getY() == to.getY()) {
+            if (from.getX() - 1 == to.getX()) {
+                return LEFT;
+            } else if (from.getX() + 1 == to.getX()) {
+                return RIGHT;
+            }
+        } else if (from.getX() == to.getX()) {
+            if (from.getY() - 1 == to.getY()) {
+                return UP;
+            } else if (from.getY() + 1 == to.getY()) {
+                return DOWN;
+            }
+        }
+        System.out.println("Bad point at " + from + " -> " + to);
+        return result;
+    }
+
+    private Point2D getNextPoint(Point2D bot, int direction) {
+        switch (direction) {
+            case UP: // n
+                return new Point2D(bot.getX(), bot.getY() - 1);
+            case DOWN: // s
+                return new Point2D(bot.getX(), bot.getY() + 1);
+            case LEFT: // w
+                return new Point2D(bot.getX() - 1, bot.getY());
+            case RIGHT: // e
+                return new Point2D(bot.getX() + 1, bot.getY());
+            default:
+                throw new RuntimeException("Unknown direction");
+        }
+    }
+
+    class Bot {
+        IntComp ic;
+        @Getter
+        Point2D location = Point2D.ZERO;
+        @Getter
+        Point2D oxygenLocation;
+
+        Bot(String prog) {
+            ic = new IntComp(prog, 0);
+        }
+
+        /**
+         * Investigate direction and return
+         *
+         * @param direction which direction to poke
+         * @return false if wall, true if hallway
+         */
+        boolean poke(int direction) {
+            boolean moved = move(direction);
+            if (moved) {
+                move(inverse(direction));
+            }
+            return moved;
+        }
+
+        boolean move(int direction) {
+            Point2D nextPossiblePoint = getNextPoint(location, direction);
+            ic.addToInput(direction);
+            ic.run();
+            Queue<Long> out = ic.getOutput();
+            int o = Objects.requireNonNull(out.poll()).intValue();
+            switch (o) {
+                case 0: // wall
+                    return false;
+                case 2: // moved, found oxygen
+                    if (oxygenLocation == null) {
+                        oxygenLocation = nextPossiblePoint;
+                    }
+                case 1: // moved
+                    location = nextPossiblePoint;
+                    return true;
+                default:
+                    throw new RuntimeException("Unexpected response from bot");
+            }
+
+        }
+    }
 }
