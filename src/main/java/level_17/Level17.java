@@ -2,13 +2,18 @@ package level_17;
 
 import common.IntComp;
 import common.Level;
+import common.Point2D;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class Level17 extends Level {
     IntComp ic;
     String prog;
     boolean[][] map;
+    Point2D startingPoint;
     private static final boolean VERBOSE = false;
 
     public Level17(String input) {
@@ -43,22 +48,56 @@ public class Level17 extends Level {
         return intersections;
     }
 
-    public long p2() {
-        long cleaned = 0L;
-        ic.reset();
-        /*ic.getData().put(0L, 2L);
+    String tracePath(boolean[][] map) {
+        StringBuilder result = new StringBuilder();
+        List<Point2D> directions = new LinkedList<>();
+        directions.add(new Point2D(-1, 0)); // l
+        directions.add(new Point2D(0, -1)); // u
+        directions.add(new Point2D(1, 0)); // r
+        directions.add(new Point2D(0, 1)); // d
 
-        feedToBot("A,B,C"); // main
-        printBotOutput();
-        feedToBot("L,10,R,8,R,6,R,10,L"); // a
-        feedToBot("12");  // b
-        feedToBot("R");  // c 9x6 square
-        feedToBot("y"); // live feed
-        cleaned += ic.getOutput().poll();
-        printBotOutput();
-        */
-        System.out.println("cleaned: " + cleaned);
-        return -1;
+        int x = startingPoint.getX();
+        int y = startingPoint.getY();
+
+        while (true) {
+            if (map[y + directions.get(0).getY()][x + directions.get(0).getX()]) {
+                result.append("L,");
+                Collections.rotate(directions, 1);
+            } else if (map[y + directions.get(2).getY()][x + directions.get(2).getX()]) {
+                result.append("R,");
+                Collections.rotate(directions, -1);
+            } else {
+                break;
+            }
+            int steps = 0;
+            while (map[y + directions.get(1).getY()][x + directions.get(1).getX()]) {
+                steps++;
+                y += directions.get(1).getY();
+                x += directions.get(1).getX();
+            }
+            result.append(steps).append(',');
+        }
+
+        return result.toString();
+    }
+
+    public long p2() {
+        String wholePath = tracePath(map);
+
+        if (VERBOSE) System.out.println(wholePath);
+
+        ic.reset();
+        ic.getData().put(0L, 2L);
+
+        // Shame on me, couldn't automate string compression :-(
+        feedToBot("A,B,A,B,C,C,B,A,C,A"); // main
+        feedToBot("L,10,R,8,R,6,R,10"); // a
+        feedToBot("L,12,R,8,L,12");  // b
+        feedToBot("L,10,R,8,R,8");  // c
+        feedToBot(VERBOSE ? "y" : "n"); // live feed
+        long cleaned = ((LinkedList<Long>) ic.getOutput()).getLast();
+        if (VERBOSE) printBotOutput();
+        return cleaned;
     }
 
     private void printBotOutput() {
@@ -85,7 +124,7 @@ public class Level17 extends Level {
     public static void main(String[] args) {
         Level17 l = new Level17("input");
         System.out.println("Part1: " + l.p1());
-        System.out.println("Part1: " + l.p2());
+        System.out.println("Part2: " + l.p2());
     }
 
     public boolean[][] parseData(String in) {
@@ -107,12 +146,13 @@ public class Level17 extends Level {
             for (int j = 0; j < w; j++) {
                 // All previous newlines + all cells in previous lines + current x
                 int aci = i + j + i * w;
-                if (aci >= asChars.length) {
-                    System.out.printf("w:h %d:%d x:y %d:%d idx %d%n", w, h, j, i, aci);
+                switch (asChars[aci]) {
+                    case '.':
+                        continue;
+                    case '^':
+                        startingPoint = new Point2D(j + 1, i + 1);
                 }
-                if (asChars[aci] != '.') {
-                    result[i + 1][j + 1] = true;
-                }
+                result[i + 1][j + 1] = true;
             }
         }
 
