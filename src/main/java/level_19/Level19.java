@@ -8,6 +8,7 @@ import java.util.Queue;
 
 public class Level19 extends Level {
     private Drone drone;
+    private static final int SQUARE_SIZE = 100;
     private static final boolean VERBOSE = false;
 
     public Level19(String input) {
@@ -52,22 +53,23 @@ public class Level19 extends Level {
 
         int approxX = -1;
         int approxY = -1;
-        // Find the approximate
-        for (int topRightX = 100; approxX == -1; topRightX++) {
+        // Approximate the square fit position
+        for (int topRightX = SQUARE_SIZE; approxX == -1; topRightX++) {
             int topRightY = Math.round(rightLineParam * topRightX);
-            int bottomLeftX = topRightX - 100;
-            int bottomLeftY = topRightY + 100;
+            int bottomLeftX = topRightX - SQUARE_SIZE;
+            int bottomLeftY = topRightY + SQUARE_SIZE;
             if (bottomLeftY == Math.round(leftLineParam * bottomLeftX)) {
-                approxX = topRightX - 100;
-                approxY = bottomLeftY - 100;
+                approxX = topRightX - SQUARE_SIZE;
+                approxY = bottomLeftY - SQUARE_SIZE;
             }
         }
 
         if (VERBOSE) System.out.printf("apX: %d, apY: %d%n", approxX, approxY);
 
         // Now find exact coordinates
-        for (int y = approxY - 10; y < approxY + 10; y++) {
-            for (int x = approxX - 10; x < approxX + 10; x++) {
+        int searchRadius = 10;
+        for (int y = approxY - searchRadius; y < approxY + searchRadius; y++) {
+            for (int x = approxX - searchRadius; x < approxX + searchRadius; x++) {
                 boolean t = canFitSquareAt(x, y);
                 if (t) {
                     return 10_000 * x + y;
@@ -78,14 +80,12 @@ public class Level19 extends Level {
     }
 
     boolean canFitSquareAt(int lcx, int lcy) {
-        for (int y = lcy; y < lcy + 100; y++) {
+        for (int y = lcy; y < lcy + SQUARE_SIZE; y++) {
             boolean t = drone.move(lcx, y);
-            drone.ic.reset();
             if (!t) return false;
         }
-        for (int x = lcx; x < lcx + 100; x++) {
+        for (int x = lcx; x < lcx + SQUARE_SIZE; x++) {
             boolean t = drone.move(x, lcy);
-            drone.ic.reset();
             if (!t) return false;
         }
         return true;
