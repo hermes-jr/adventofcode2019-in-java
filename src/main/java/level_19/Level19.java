@@ -22,19 +22,55 @@ public class Level19 extends Level {
                 boolean t = drone.move(x, y);
                 if (VERBOSE) System.out.print(t ? "#" : '.');
                 if (t) result++;
-                drone.ic.reset();
             }
             if (VERBOSE) System.out.print(System.lineSeparator());
         }
         return result;
     }
 
-    int p2() {
-        for (int y = 500; y < 10000; y++) {
-            for (int x = 100; x < 8000; x++) {
+    long p2() {
+        // By scanning 5000x5000 area diagonally find the equation which describes each borderline of a beam as a line
+        float leftLineParam = 0;
+        float rightLineParam = 0;
+
+        for (int x = 0, y = 5000; x >= 0; x++, y--) {
+            boolean t = drone.move(x, y);
+            if (t) {
+                leftLineParam = y / (float) x;
+                break;
+            }
+        }
+        for (int x = 5000, y = 0; y >= 0; x--, y++) {
+            boolean t = drone.move(x, y);
+            if (t) {
+                rightLineParam = y / (float) x;
+                break;
+            }
+        }
+
+        if (VERBOSE) System.out.printf("sl1: %s, sl2: %s%n", leftLineParam, rightLineParam);
+
+        int approxX = -1;
+        int approxY = -1;
+        // Find the approximate
+        for (int topRightX = 100; approxX == -1; topRightX++) {
+            int topRightY = Math.round(rightLineParam * topRightX);
+            int bottomLeftX = topRightX - 100;
+            int bottomLeftY = topRightY + 100;
+            if (bottomLeftY == Math.round(leftLineParam * bottomLeftX)) {
+                approxX = topRightX - 100;
+                approxY = bottomLeftY - 100;
+            }
+        }
+
+        if (VERBOSE) System.out.printf("apX: %d, apY: %d%n", approxX, approxY);
+
+        // Now find exact coordinates
+        for (int y = approxY - 10; y < approxY + 10; y++) {
+            for (int x = approxX - 10; x < approxX + 10; x++) {
                 boolean t = canFitSquareAt(x, y);
                 if (t) {
-                    return 10000 * x + y;
+                    return 10_000 * x + y;
                 }
             }
         }
@@ -79,6 +115,7 @@ public class Level19 extends Level {
             ic.run();
             Queue<Long> out = ic.getOutput();
             int o = Objects.requireNonNull(out.poll()).intValue();
+            ic.reset();
             if (o != 0 && o != 1) {
                 throw new RuntimeException("Unexpected response from bot: " + o);
             }
