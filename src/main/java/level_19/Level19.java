@@ -29,10 +29,36 @@ public class Level19 extends Level {
         return result;
     }
 
+    int p2() {
+        for (int y = 500; y < 10000; y++) {
+            for (int x = 100; x < 8000; x++) {
+                boolean t = canFitSquareAt(x, y);
+                if (t) {
+                    return 10000 * x + y;
+                }
+            }
+        }
+        return -1;
+    }
+
+    boolean canFitSquareAt(int lcx, int lcy) {
+        for (int y = lcy; y < lcy + 100; y++) {
+            boolean t = drone.move(lcx, y);
+            drone.ic.reset();
+            if (!t) return false;
+        }
+        for (int x = lcx; x < lcx + 100; x++) {
+            boolean t = drone.move(x, lcy);
+            drone.ic.reset();
+            if (!t) return false;
+        }
+        return true;
+    }
+
     public static void main(String[] args) {
         Level19 l = new Level19("input");
         System.out.println("Part1: " + l.p1());
-//        System.out.println("Part2: " + l.p2());
+        System.out.println("Part2: " + l.p2());
     }
 
     static class Drone {
