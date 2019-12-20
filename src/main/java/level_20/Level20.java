@@ -53,7 +53,7 @@ public class Level20 extends Level {
 
                     // Is the current location named?
                     Optional<ImmutablePair<String, Boolean>> pointNamingData = getNameForPoint(asChars, currentPoint);
-                    if (pointNamingData.isEmpty()) {
+                    if (!pointNamingData.isPresent()) {
                         continue;
                     }
                     String portName = pointNamingData.get().getLeft();
