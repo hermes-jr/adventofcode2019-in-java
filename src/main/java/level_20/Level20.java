@@ -2,7 +2,8 @@ package level_20;
 
 
 import common.Level;
-import common.Point2D;
+import common.Point3D;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -15,12 +16,13 @@ import java.util.Map;
 import java.util.Optional;
 
 public class Level20 extends Level {
-    Point2D start;
-    Point2D end;
-    Map<String, Point2D> portals = new HashMap<>();
+    Point3D start;
+    Point3D end;
+    Map<String, Point3D> innerPortals = new HashMap<>();
+    Map<String, Point3D> outerPortals = new HashMap<>();
 
-    SimpleGraph<Point2D, DefaultEdge> parseMap(List<String> indata) {
-        SimpleGraph<Point2D, DefaultEdge> g = new SimpleGraph<>(DefaultEdge.class);
+    SimpleGraph<Point3D, DefaultEdge> parseMap(List<String> indata) {
+        SimpleGraph<Point3D, DefaultEdge> g = new SimpleGraph<>(DefaultEdge.class);
 
         int w = indata.get(0).length();
         int h = indata.size();
@@ -34,38 +36,45 @@ public class Level20 extends Level {
             for (int j = 0; j < w; j++) {
                 if (asChars[i][j] == '.') {
                     // This is a passage
-                    Point2D currentPoint = new Point2D(j, i);
+                    Point3D currentPoint = new Point3D(j, i, 0);
                     g.addVertex(currentPoint);
 
                     // Can we go up? If so, connect
                     if (asChars[i - 1][j] == '.') {
-                        g.addEdge(currentPoint, new Point2D(j, i - 1));
+                        g.addEdge(currentPoint, new Point3D(j, i - 1, 0));
                     }
 
                     // Can we go left? If so, connect
                     if (asChars[i][j - 1] == '.') {
-                        g.addEdge(currentPoint, new Point2D(j - 1, i));
+                        g.addEdge(currentPoint, new Point3D(j - 1, i, 0));
                     }
 
                     // Is the current location named?
-                    Optional<String> currentPointNameO = getNameForPoint(asChars, currentPoint);
-                    if (currentPointNameO.isEmpty()) {
+                    Optional<ImmutablePair<String, Boolean>> pointNamingData = getNameForPoint(asChars, currentPoint);
+                    if (pointNamingData.isEmpty()) {
                         continue;
                     }
-                    String currentPointName = currentPointNameO.get();
+                    String portName = pointNamingData.get().getLeft();
+                    boolean portalOuter = pointNamingData.get().getRight();
 
-                    if ("AA".equals(currentPointName)) {
+                    if ("AA".equals(portName)) {
                         start = currentPoint;
-                    } else if ("ZZ".equals(currentPointName)) {
+                        continue;
+                    } else if ("ZZ".equals(portName)) {
                         end = currentPoint;
+                        continue;
+                    }
+
+                    if (portalOuter) {
+                        outerPortals.put(portName, currentPoint);
+                    } else {
+                        innerPortals.put(portName, currentPoint);
                     }
 
                     // Is the other side already discovered?
-                    Point2D otherSide = portals.get(currentPointName);
+                    Point3D otherSide = portalOuter ? innerPortals.get(portName) : outerPortals.get(portName);
                     if (otherSide != null) {
                         g.addEdge(currentPoint, otherSide);
-                    } else {
-                        portals.put(currentPointName, currentPoint);
                     }
                 }
             }
@@ -74,25 +83,30 @@ public class Level20 extends Level {
         return g;
     }
 
-    private Optional<String> getNameForPoint(char[][] asChars, Point2D currentCoordinate) {
+    private Optional<ImmutablePair<String, Boolean>> getNameForPoint(char[][] asChars, Point3D currentCoordinate) {
         int x = currentCoordinate.getX();
         int y = currentCoordinate.getY();
+        boolean outer = false;
+        if (x == 2 || y == 2 || x + 3 >= asChars[0].length || y + 3 >= asChars.length) {
+            // On the edge
+            outer = true;
+        }
 
-        // Sign above
+        // Signed above
         if (isLetter(asChars[y - 1][x])) {
-            return Optional.of(String.valueOf(asChars[y - 2][x]) + asChars[y - 1][x]);
+            return Optional.of(ImmutablePair.of(String.valueOf(asChars[y - 2][x]) + asChars[y - 1][x], outer));
         }
-        // Sign on the left
-        if (isLetter(asChars[y][x - 1])) {
-            return Optional.of(String.valueOf(asChars[y][x - 2]) + asChars[y][x - 1]);
+        // Signed on the left
+        else if (isLetter(asChars[y][x - 1])) {
+            return Optional.of(ImmutablePair.of(String.valueOf(asChars[y][x - 2]) + asChars[y][x - 1], outer));
         }
-        // Sign on the right
-        if (isLetter(asChars[y][x + 1])) {
-            return Optional.of(String.valueOf(asChars[y][x + 1]) + asChars[y][x + 2]);
+        // Signed on the right
+        else if (isLetter(asChars[y][x + 1])) {
+            return Optional.of(ImmutablePair.of(String.valueOf(asChars[y][x + 1]) + asChars[y][x + 2], outer));
         }
-        // Sign below
-        if (isLetter(asChars[y + 1][x])) {
-            return Optional.of(String.valueOf(asChars[y + 1][x]) + asChars[y + 2][x]);
+        // Signed below
+        else if (isLetter(asChars[y + 1][x])) {
+            return Optional.of(ImmutablePair.of(String.valueOf(asChars[y + 1][x]) + asChars[y + 2][x], outer));
         }
         return Optional.empty();
     }
@@ -101,20 +115,26 @@ public class Level20 extends Level {
         return c >= 'A' && c <= 'Z';
     }
 
-    int p1(SimpleGraph<Point2D, DefaultEdge> g) {
-        DijkstraShortestPath<Point2D, DefaultEdge> dijkstraAlg =
+    int p1(SimpleGraph<Point3D, DefaultEdge> g) {
+        DijkstraShortestPath<Point3D, DefaultEdge> dijkstraAlg =
                 new DijkstraShortestPath<>(g);
-        ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultEdge> iPaths = dijkstraAlg.getPaths(start);
-        GraphPath<Point2D, DefaultEdge> toExit = iPaths.getPath(end);
+        ShortestPathAlgorithm.SingleSourcePaths<Point3D, DefaultEdge> iPaths = dijkstraAlg.getPaths(start);
+        GraphPath<Point3D, DefaultEdge> toExit = iPaths.getPath(end);
         return toExit.getLength();
+    }
+
+    private int p2(SimpleGraph<Point3D, DefaultEdge> g) {
+
+        return -1;
     }
 
     public static void main(String[] args) {
         Level20 l = new Level20();
-        SimpleGraph<Point2D, DefaultEdge> g = l.parseMap(l.readResources("input"));
+        SimpleGraph<Point3D, DefaultEdge> g = l.parseMap(l.readResources("input"));
 
 
         System.out.println("Part1: " + l.p1(g));
+//        System.out.println("Part2: " + l.p2(g));
     }
 
 }
