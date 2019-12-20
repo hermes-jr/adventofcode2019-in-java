@@ -5,6 +5,7 @@ import common.Level;
 import common.Point3D;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jgrapht.GraphPath;
+import org.jgrapht.Graphs;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Level20 extends Level {
     Point3D start;
@@ -116,6 +118,50 @@ public class Level20 extends Level {
     }
 
     int p1(SimpleGraph<Point3D, DefaultEdge> g) {
+        return getShortestPath(g);
+    }
+
+    private int p2(SimpleGraph<Point3D, DefaultEdge> g) {
+        // Remove all existing inter-portal links
+        innerPortals.forEach((key, value) -> g.removeEdge(value, outerPortals.get(key)));
+
+        //noinspection unchecked
+        SimpleGraph<Point3D, DefaultEdge> templateLevel = (SimpleGraph<Point3D, DefaultEdge>) g.clone();
+        templateLevel.removeVertex(start);
+        templateLevel.removeVertex(end);
+
+        for (int depth = 1; depth < 15; depth++) {
+            final int efd = depth;
+            // Copy template level into original graph preserving connectivity
+            Graphs.addAllVertices(g,
+                    templateLevel.vertexSet().stream()
+                            .map(vtx -> new Point3D(vtx.getX(), vtx.getY(), efd))
+                            .collect(Collectors.toList()));
+
+            for (Point3D vtx : templateLevel.vertexSet()) {
+                Graphs.successorListOf(templateLevel, vtx)
+                        .forEach(
+                                p2 -> g.addEdge(
+                                        new Point3D(vtx.getX(), vtx.getY(), efd),
+                                        new Point3D(p2.getX(), p2.getY(), efd))
+                        );
+            }
+
+            // Add inter-level links
+            for (Map.Entry<String, Point3D> innerPortalEntry : innerPortals.entrySet()) {
+                Point3D outerPortal = outerPortals.get(innerPortalEntry.getKey());
+                Point3D innerPortal = innerPortalEntry.getValue();
+                g.addEdge(
+                        new Point3D(innerPortal.getX(), innerPortal.getY(), efd - 1),
+                        new Point3D(outerPortal.getX(), outerPortal.getY(), efd)
+                );
+            }
+        }
+
+        return getShortestPath(g);
+    }
+
+    private int getShortestPath(SimpleGraph<Point3D, DefaultEdge> g) {
         DijkstraShortestPath<Point3D, DefaultEdge> dijkstraAlg =
                 new DijkstraShortestPath<>(g);
         ShortestPathAlgorithm.SingleSourcePaths<Point3D, DefaultEdge> iPaths = dijkstraAlg.getPaths(start);
@@ -123,18 +169,12 @@ public class Level20 extends Level {
         return toExit.getLength();
     }
 
-    private int p2(SimpleGraph<Point3D, DefaultEdge> g) {
-
-        return -1;
-    }
-
     public static void main(String[] args) {
         Level20 l = new Level20();
         SimpleGraph<Point3D, DefaultEdge> g = l.parseMap(l.readResources("input"));
 
-
         System.out.println("Part1: " + l.p1(g));
-//        System.out.println("Part2: " + l.p2(g));
+        System.out.println("Part2: " + l.p2(g));
     }
 
 }
