@@ -28,5 +28,11 @@ public class Level20Test extends Level {
         SimpleGraph<Point3D, DefaultEdge> g1 = l.parseMap(l.readResources("in1"));
         assertThat(l.p1(g1)).isEqualTo(58);
     }
+
+    @Test
+    void shortestRouteInSingleDimensionShouldBeCalculatedRecursive() {
+        SimpleGraph<Point3D, DefaultEdge> g2 = l.parseMap(l.readResources("in2"));
+        assertThat(l.p2(g2)).isEqualTo(396);
+    }
 }
 

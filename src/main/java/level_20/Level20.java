@@ -121,7 +121,7 @@ public class Level20 extends Level {
         return getShortestPath(g);
     }
 
-    private int p2(SimpleGraph<Point3D, DefaultEdge> g) {
+    int p2(SimpleGraph<Point3D, DefaultEdge> g) {
         // Remove all existing inter-portal links
         innerPortals.forEach((key, value) -> g.removeEdge(value, outerPortals.get(key)));
 
@@ -130,7 +130,7 @@ public class Level20 extends Level {
         templateLevel.removeVertex(start);
         templateLevel.removeVertex(end);
 
-        for (int depth = 1; depth < 15; depth++) {
+        for (int depth = 1; depth < 30; depth++) {
             final int efd = depth;
             // Copy template level into original graph preserving connectivity
             Graphs.addAllVertices(g,
