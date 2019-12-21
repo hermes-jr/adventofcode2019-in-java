@@ -17,15 +17,33 @@ public class Level18 extends Level {
     Set<Point2D> keys = new HashSet<>();
     Set<Point2D> doors = new HashSet<>();
     Map<Point2D, Point2D> doorToKey = new HashMap<>();
-    Map<Point2D, ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge>> shortPaths = new HashMap<>();
     Map<ImmutablePair<Point2D, Set<Point2D>>, Integer> cache = new HashMap<>();
+    Map<ImmutablePair<Point2D, Point2D>, List<Point2D>> pathsCache = new HashMap<>();
 
     public Level18(String filename) {
         List<String> in = readResources(filename);
         parseMap(in);
-        DijkstraShortestPath<Point2D, DefaultWeightedEdge> dijkstraAlg = new DijkstraShortestPath<>(g);
-        keys.forEach(z -> shortPaths.put(z, dijkstraAlg.getPaths(z)));
-        shortPaths.put(startingPosition, dijkstraAlg.getPaths(startingPosition));
+        ShortestPathAlgorithm<Point2D, DefaultWeightedEdge> shortestPathAlg = new DijkstraShortestPath<>(g);
+        keys.forEach(
+                k -> {
+                    ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge> alg = shortestPathAlg.getPaths(k);
+                    keys.forEach(
+                            sk -> {
+                                if (!sk.equals(k)) {
+                                    pathsCache.put(ImmutablePair.of(k, sk), alg.getPath(sk).getVertexList());
+                                }
+                            }
+                    );
+                }
+        );
+        ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge> alg = shortestPathAlg.getPaths(startingPosition);
+        keys.forEach(
+                k -> {
+                    pathsCache.put(ImmutablePair.of(startingPosition, k), alg.getPath(k).getVertexList());
+                    pathsCache.put(ImmutablePair.of(k, k), Collections.emptyList());
+                }
+        );
+        pathsCache.put(ImmutablePair.of(startingPosition, startingPosition), Collections.emptyList());
     }
 
     void parseMap(List<String> indata) {
@@ -95,13 +113,13 @@ public class Level18 extends Level {
 
         int result = Integer.MAX_VALUE;
 
-        Set<Point2D> reachableKeys = getReachableKeys(keysLeft, currentPoint);
+        Map<Point2D, Integer> reachableKeys = getReachableKeys(keysLeft, currentPoint);
 
-        for (Point2D nextKey : reachableKeys) {
+        for (Map.Entry<Point2D, Integer> entry : reachableKeys.entrySet()) {
             Set<Point2D> nextKeysLeft = new HashSet<>(keysLeft);
             nextKeysLeft.remove(currentPoint);
-            int selfDistance = shortPaths.get(currentPoint).getPath(nextKey).getLength();
-            int distanceToEnd = recursiveVisitPoint(Collections.unmodifiableSet(nextKeysLeft), nextKey);
+            int selfDistance = entry.getValue();
+            int distanceToEnd = recursiveVisitPoint(Collections.unmodifiableSet(nextKeysLeft), entry.getKey());
             result = Math.min(selfDistance + distanceToEnd, result);
         }
 
@@ -109,17 +127,17 @@ public class Level18 extends Level {
         return result;
     }
 
-    private Set<Point2D> getReachableKeys(Set<Point2D> keysLeft, Point2D currentPoint) {
-        Set<Point2D> reachableKeys = new HashSet<>();
+    private Map<Point2D, Integer> getReachableKeys(Set<Point2D> keysLeft, Point2D currentPoint) {
+        Map<Point2D, Integer> reachableKeys = new HashMap<>();
+        outerLoop:
         for (Point2D potentiallyReachable : keysLeft) {
-            List<Point2D> path = shortPaths.get(currentPoint).getPath(potentiallyReachable).getVertexList();
-            Optional<Point2D> closedDoor = path.stream()
-                    .filter(z -> doors.contains(z) && keysLeft.contains(doorToKey.get(z)))
-                    .findAny();
-            if (closedDoor.isPresent()) {
-                continue;
+            List<Point2D> path = pathsCache.get(ImmutablePair.of(currentPoint, potentiallyReachable));
+            for (Point2D p : path) {
+                if (doors.contains(p) && keysLeft.contains(doorToKey.get(p))) {
+                    continue outerLoop;
+                }
             }
-            reachableKeys.add(potentiallyReachable);
+            reachableKeys.put(potentiallyReachable, Math.max(0, path.size() - 1));
         }
         if (reachableKeys.size() == 0) {
             throw new RuntimeException("No reachable keys");
