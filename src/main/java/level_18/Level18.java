@@ -14,20 +14,19 @@ import org.jgrapht.graph.SimpleGraph;
 import java.util.*;
 
 public class Level18 extends Level {
-    Point2D currentPosition;
-    int shortestSeenSoFar = Integer.MAX_VALUE;
+    SimpleGraph<Point2D, DefaultWeightedEdge> g = new SimpleGraph<>(DefaultWeightedEdge.class);
+    Point2D startingPosition;
     BidiMap<Character, Point2D> keys = new DualHashBidiMap<>();
     BidiMap<Character, Point2D> doors = new DualHashBidiMap<>();
     Map<Point2D, ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge>> shortPaths = new HashMap<>();
-    SimpleGraph<Point2D, DefaultWeightedEdge> g = new SimpleGraph<>(DefaultWeightedEdge.class);
-    Set<ImmutablePair<Point2D, Set<Point2D>>> cache = new HashSet<>();
+    Map<ImmutablePair<Point2D, Set<Point2D>>, Integer> cache = new HashMap<>();
 
     public Level18(String filename) {
         List<String> in = readResources(filename);
         parseMap(in);
         DijkstraShortestPath<Point2D, DefaultWeightedEdge> dijkstraAlg = new DijkstraShortestPath<>(g);
         keys.values().forEach(z -> shortPaths.put(z, dijkstraAlg.getPaths(z)));
-        shortPaths.put(currentPosition, dijkstraAlg.getPaths(currentPosition));
+        shortPaths.put(startingPosition, dijkstraAlg.getPaths(startingPosition));
     }
 
     void parseMap(List<String> indata) {
@@ -59,7 +58,7 @@ public class Level18 extends Level {
                 }
 
                 if (cc == '@') {
-                    currentPosition = new Point2D(j, i);
+                    startingPosition = new Point2D(j, i);
                 } else if (Character.isUpperCase(cc)) {
                     doors.put(cc, currentPoint);
                 } else if (Character.isLowerCase(cc)) {
@@ -71,57 +70,56 @@ public class Level18 extends Level {
     }
 
     int p1() {
-        List<Character> keysFound = Collections.emptyList();
-        Set<Point2D> lockedDoors = Collections.unmodifiableSet(new HashSet<>(doors.values()));
-        visitPoint(keysFound, lockedDoors, currentPosition, 0);
-        return shortestSeenSoFar;
+        return recursiveVisitPoint(new HashSet<>(keys.values()), startingPosition);
     }
 
-    void visitPoint(List<Character> keysFound, Set<Point2D> lockedDoors, Point2D currentPoint, int stepsSoFar) {
-//        System.out.println("Visiting " + currentPoint + ", keys found: " + keysFound);
-        if (stepsSoFar >= shortestSeenSoFar) { // No reason to dig deeper
-            return;
-        }
-        if (cache.contains(ImmutablePair.of(currentPoint, lockedDoors))) {
-            return;
-        }
-        List<Character> nKeysFound = new ArrayList<>(keysFound);
-        Character keyName = keys.getKey(currentPoint);
-        Set<Point2D> nLockedDoors = new HashSet<>(lockedDoors);
-        if (keyName != null) {
-//            System.out.println("Collected key: " + keyName);
-            nKeysFound.add(keyName);
-            nLockedDoors.remove(doors.get(Character.toUpperCase(keyName)));
-        }
-        if (nKeysFound.size() == keys.size()) { // No more keys to collect
-            if (stepsSoFar <= shortestSeenSoFar) {
-                shortestSeenSoFar = stepsSoFar;
-            }
-            return;
+    int recursiveVisitPoint(Set<Point2D> keysLeft, Point2D currentPoint) {
+        if (keysLeft.isEmpty()) {
+            return 0;
         }
 
-        Map<Point2D, Integer> reachableKeys = new HashMap<>();
-        for (Point2D potentiallyReachable : keys.values()) {
+        ImmutablePair<Point2D, Set<Point2D>> keyPath = ImmutablePair.of(currentPoint, Collections.unmodifiableSet(keysLeft));
+        Integer cachedDistance = cache.get(keyPath);
+        if (cachedDistance != null) {
+            return cachedDistance;
+        }
+
+        int result = Integer.MAX_VALUE;
+
+        Set<Point2D> reachableKeys = getReachableKeys(keysLeft, currentPoint);
+
+        for (Point2D nextKey : reachableKeys) {
+            Set<Point2D> nextKeysLeft = new HashSet<>(keysLeft);
+            nextKeysLeft.remove(currentPoint);
+            int selfDistance = shortPaths.get(currentPoint).getPath(nextKey).getLength();
+            int distanceToEnd = recursiveVisitPoint(Collections.unmodifiableSet(nextKeysLeft), nextKey);
+            result = Math.min(selfDistance + distanceToEnd, result);
+        }
+
+        cache.put(keyPath, result);
+        return result;
+    }
+
+    private Set<Point2D> getReachableKeys(Set<Point2D> keysLeft, Point2D currentPoint) {
+        Set<Point2D> reachableKeys = new HashSet<>();
+        for (Point2D potentiallyReachable : keysLeft) {
             List<Point2D> path = shortPaths.get(currentPoint).getPath(potentiallyReachable).getVertexList();
             for (Point2D p : path) {
-                if (nLockedDoors.contains(p)) {
-                    break;
+                if (doors.containsValue(p)) { // It's a door
+                    Point2D fittingKey = keys.get(Character.toLowerCase(doors.getKey(p)));
+                    if (keysLeft.contains(fittingKey)) {
+                        break; // Nothing to open with
+                    }
                 }
-                if (p.equals(potentiallyReachable) && !nKeysFound.contains(keys.getKey(p))) {
-                    reachableKeys.put(p, path.size());
+                if (p.equals(potentiallyReachable)) {
+                    reachableKeys.add(p);
                 }
             }
         }
         if (reachableKeys.size() == 0) {
             throw new RuntimeException("No reachable keys");
         }
-
-        for (Map.Entry<Point2D, Integer> entry : reachableKeys.entrySet()) {
-            Point2D nextStep = entry.getKey();
-            visitPoint(Collections.unmodifiableList(nKeysFound), Collections.unmodifiableSet(nLockedDoors), nextStep, stepsSoFar + entry.getValue() - 1);
-        }
-
-        cache.add(ImmutablePair.of(currentPoint, Collections.unmodifiableSet(nLockedDoors)));
+        return reachableKeys;
     }
 
     public static void main(String[] args) {
