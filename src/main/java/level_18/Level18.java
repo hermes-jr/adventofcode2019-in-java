@@ -40,10 +40,8 @@ public class Level18 extends Level {
         keys.forEach(
                 k -> {
                     pathsCache.put(ImmutablePair.of(startingPosition, k), alg.getPath(k).getVertexList());
-                    pathsCache.put(ImmutablePair.of(k, k), Collections.emptyList());
                 }
         );
-        pathsCache.put(ImmutablePair.of(startingPosition, startingPosition), Collections.emptyList());
     }
 
     void parseMap(List<String> indata) {
@@ -131,13 +129,17 @@ public class Level18 extends Level {
         Map<Point2D, Integer> reachableKeys = new HashMap<>();
         outerLoop:
         for (Point2D potentiallyReachable : keysLeft) {
+            if (potentiallyReachable.equals(currentPoint)) {
+                reachableKeys.put(potentiallyReachable, 0);
+                continue;
+            }
             List<Point2D> path = pathsCache.get(ImmutablePair.of(currentPoint, potentiallyReachable));
             for (Point2D p : path) {
                 if (doors.contains(p) && keysLeft.contains(doorToKey.get(p))) {
                     continue outerLoop;
                 }
             }
-            reachableKeys.put(potentiallyReachable, Math.max(0, path.size() - 1));
+            reachableKeys.put(potentiallyReachable, path.size() - 1);
         }
         if (reachableKeys.size() == 0) {
             throw new RuntimeException("No reachable keys");
