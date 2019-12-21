@@ -36,15 +36,30 @@ public class Level21 extends Level {
     ABCD
     !A || (!C && D)
          */
-
         ic.run();
-        printBotOutput();
         feedToBot("NOT A T");
         feedToBot("OR T J");
         feedToBot("NOT C T");
         feedToBot("AND D T");
         feedToBot("OR T J");
         feedToBot("WALK");
+        long damage = ((LinkedList<Long>) ic.getOutput()).getLast();
+        if (VERBOSE) printBotOutput();
+        return damage;
+    }
+
+    public long p2() {
+        ic.reset();
+        ic.run();
+        feedToBot("OR A J");
+        feedToBot("AND B J");
+        feedToBot("AND C J");
+        feedToBot("NOT J J");
+        feedToBot("AND D J");
+        feedToBot("OR E T");
+        feedToBot("OR H T");
+        feedToBot("AND T J");
+        feedToBot("RUN");
         long damage = ((LinkedList<Long>) ic.getOutput()).getLast();
         if (VERBOSE) printBotOutput();
         return damage;
@@ -74,5 +89,6 @@ public class Level21 extends Level {
     public static void main(String[] args) {
         Level21 l = new Level21("input");
         System.out.println("Part1: " + l.p1());
+        System.out.println("Part2: " + l.p2());
     }
 }
