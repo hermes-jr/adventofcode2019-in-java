@@ -3,8 +3,6 @@ package level_18;
 
 import common.Level;
 import common.Point2D;
-import org.apache.commons.collections4.BidiMap;
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -16,8 +14,9 @@ import java.util.*;
 public class Level18 extends Level {
     SimpleGraph<Point2D, DefaultWeightedEdge> g = new SimpleGraph<>(DefaultWeightedEdge.class);
     Point2D startingPosition;
-    BidiMap<Character, Point2D> keys = new DualHashBidiMap<>();
-    BidiMap<Character, Point2D> doors = new DualHashBidiMap<>();
+    Set<Point2D> keys = new HashSet<>();
+    Set<Point2D> doors = new HashSet<>();
+    Map<Point2D, Point2D> doorToKey = new HashMap<>();
     Map<Point2D, ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge>> shortPaths = new HashMap<>();
     Map<ImmutablePair<Point2D, Set<Point2D>>, Integer> cache = new HashMap<>();
 
@@ -25,11 +24,13 @@ public class Level18 extends Level {
         List<String> in = readResources(filename);
         parseMap(in);
         DijkstraShortestPath<Point2D, DefaultWeightedEdge> dijkstraAlg = new DijkstraShortestPath<>(g);
-        keys.values().forEach(z -> shortPaths.put(z, dijkstraAlg.getPaths(z)));
+        keys.forEach(z -> shortPaths.put(z, dijkstraAlg.getPaths(z)));
         shortPaths.put(startingPosition, dijkstraAlg.getPaths(startingPosition));
     }
 
     void parseMap(List<String> indata) {
+        Point2D[] ks = new Point2D[32];
+        Point2D[] ds = new Point2D[32];
         int w = indata.get(0).length();
         int h = indata.size();
 
@@ -60,17 +61,25 @@ public class Level18 extends Level {
                 if (cc == '@') {
                     startingPosition = new Point2D(j, i);
                 } else if (Character.isUpperCase(cc)) {
-                    doors.put(cc, currentPoint);
+                    doors.add(currentPoint);
+                    ds[cc - 65] = currentPoint;
                 } else if (Character.isLowerCase(cc)) {
-                    keys.put(cc, currentPoint);
+                    keys.add(currentPoint);
+                    ks[cc - 97] = currentPoint;
                 }
+            }
+        }
+
+        for (int i = 0; i < 32; i++) {
+            if (ks[i] != null) {
+                doorToKey.put(ds[i], ks[i]);
             }
         }
 
     }
 
     int p1() {
-        return recursiveVisitPoint(new HashSet<>(keys.values()), startingPosition);
+        return recursiveVisitPoint(keys, startingPosition);
     }
 
     int recursiveVisitPoint(Set<Point2D> keysLeft, Point2D currentPoint) {
@@ -104,17 +113,13 @@ public class Level18 extends Level {
         Set<Point2D> reachableKeys = new HashSet<>();
         for (Point2D potentiallyReachable : keysLeft) {
             List<Point2D> path = shortPaths.get(currentPoint).getPath(potentiallyReachable).getVertexList();
-            for (Point2D p : path) {
-                if (doors.containsValue(p)) { // It's a door
-                    Point2D fittingKey = keys.get(Character.toLowerCase(doors.getKey(p)));
-                    if (keysLeft.contains(fittingKey)) {
-                        break; // Nothing to open with
-                    }
-                }
-                if (p.equals(potentiallyReachable)) {
-                    reachableKeys.add(p);
-                }
+            Optional<Point2D> closedDoor = path.stream()
+                    .filter(z -> doors.contains(z) && keysLeft.contains(doorToKey.get(z)))
+                    .findAny();
+            if (closedDoor.isPresent()) {
+                continue;
             }
+            reachableKeys.add(potentiallyReachable);
         }
         if (reachableKeys.size() == 0) {
             throw new RuntimeException("No reachable keys");
