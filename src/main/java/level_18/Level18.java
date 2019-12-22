@@ -10,6 +10,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleGraph;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Level18 extends Level {
     SimpleGraph<Point2D, DefaultWeightedEdge> g = new SimpleGraph<>(DefaultWeightedEdge.class);
@@ -19,15 +20,18 @@ public class Level18 extends Level {
     Map<Point2D, Point2D> doorToKey = new HashMap<>();
     Map<ImmutablePair<Point2D, Set<Point2D>>, Integer> cache = new HashMap<>();
     Map<ImmutablePair<Point2D, Point2D>, List<Point2D>> pathsCache = new HashMap<>();
+    ShortestPathAlgorithm<Point2D, DefaultWeightedEdge> shortestPathAlg;
 
     public Level18(String filename) {
         List<String> in = readResources(filename);
         parseMap(in);
-        ShortestPathAlgorithm<Point2D, DefaultWeightedEdge> shortestPathAlg = new DijkstraShortestPath<>(g);
-        keys.forEach(
+    }
+
+    private void updateCacheFor(Set<Point2D> partitionKeys, Point2D partitionStart) {
+        partitionKeys.forEach(
                 k -> {
                     ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge> alg = shortestPathAlg.getPaths(k);
-                    keys.forEach(
+                    partitionKeys.forEach(
                             sk -> {
                                 if (!sk.equals(k)) {
                                     pathsCache.put(ImmutablePair.of(k, sk), alg.getPath(sk).getVertexList());
@@ -36,10 +40,10 @@ public class Level18 extends Level {
                     );
                 }
         );
-        ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge> alg = shortestPathAlg.getPaths(startingPosition);
-        keys.forEach(
+        ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge> alg = shortestPathAlg.getPaths(partitionStart);
+        partitionKeys.forEach(
                 k -> {
-                    pathsCache.put(ImmutablePair.of(startingPosition, k), alg.getPath(k).getVertexList());
+                    pathsCache.put(ImmutablePair.of(partitionStart, k), alg.getPath(k).getVertexList());
                 }
         );
     }
@@ -95,7 +99,62 @@ public class Level18 extends Level {
     }
 
     int p1() {
+        shortestPathAlg = new DijkstraShortestPath<>(g);
+        pathsCache.clear();
+        updateCacheFor(keys, startingPosition);
         return recursiveVisitPoint(keys, startingPosition);
+    }
+
+    int p2() {
+        g.removeVertex(startingPosition);
+        g.removeVertex(new Point2D(startingPosition.getX(), startingPosition.getY()));
+        g.removeVertex(new Point2D(startingPosition.getX() - 1, startingPosition.getY()));
+        g.removeVertex(new Point2D(startingPosition.getX() + 1, startingPosition.getY()));
+        g.removeVertex(new Point2D(startingPosition.getX(), startingPosition.getY() - 1));
+        g.removeVertex(new Point2D(startingPosition.getX(), startingPosition.getY() + 1));
+
+        pathsCache.clear();
+        shortestPathAlg = new DijkstraShortestPath<>(g);
+
+        // nw
+        Set<Point2D> p1keys = keys.stream().filter(z ->
+                z.getX() < startingPosition.getX()
+                        && z.getY() < startingPosition.getY())
+                .collect(Collectors.toSet());
+        Point2D p1start = new Point2D(startingPosition.getX() - 1, startingPosition.getY() - 1);
+
+        // ne
+        Set<Point2D> p2keys = keys.stream().filter(z ->
+                z.getX() > startingPosition.getX()
+                        && z.getY() < startingPosition.getY())
+                .collect(Collectors.toSet());
+        Point2D p2start = new Point2D(startingPosition.getX() + 1, startingPosition.getY() - 1);
+
+        // sw
+        Set<Point2D> p3keys = keys.stream().filter(z ->
+                z.getX() < startingPosition.getX()
+                        && z.getY() > startingPosition.getY())
+                .collect(Collectors.toSet());
+        Point2D p3start = new Point2D(startingPosition.getX() - 1, startingPosition.getY() + 1);
+
+        // se
+        Set<Point2D> p4keys = keys.stream().filter(z ->
+                z.getX() > startingPosition.getX()
+                        && z.getY() > startingPosition.getY())
+                .collect(Collectors.toSet());
+        Point2D p4start = new Point2D(startingPosition.getX() + 1, startingPosition.getY() + 1);
+
+        updateCacheFor(p1keys, p1start);
+        updateCacheFor(p2keys, p2start);
+        updateCacheFor(p3keys, p3start);
+        updateCacheFor(p4keys, p4start);
+
+        int p1 = recursiveVisitPoint(p1keys, p1start);
+        int p2 = recursiveVisitPoint(p2keys, p2start);
+        int p3 = recursiveVisitPoint(p3keys, p3start);
+        int p4 = recursiveVisitPoint(p4keys, p4start);
+
+        return p1 + p2 + p3 + p4;
     }
 
     int recursiveVisitPoint(Set<Point2D> keysLeft, Point2D currentPoint) {
@@ -151,7 +210,7 @@ public class Level18 extends Level {
         Level18 l = new Level18("input");
 
         System.out.println("Part1: " + l.p1());
-//        System.out.println("Part2: " + l.p2(g));
+        System.out.println("Part2: " + l.p2());
     }
 
 }
