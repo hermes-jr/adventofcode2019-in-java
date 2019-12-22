@@ -50,5 +50,9 @@ public class Level18Test extends Level {
         assertThat(cache.contains(ImmutablePair.of(new Point2D(10, 20), Collections.unmodifiableSet(doorsLocked2)))).isTrue();
     }
 
+    @Test
+    void partTwoNumberOfTotalStepsShouldBeCalculatedProperly() {
+        Level18 l = new Level18("in5");
+        assertThat(l.p2()).isEqualTo(8);
+    }
 }
-
