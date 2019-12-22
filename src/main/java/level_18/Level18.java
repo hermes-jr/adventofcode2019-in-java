@@ -19,7 +19,7 @@ public class Level18 extends Level {
     Set<Point2D> doors = new HashSet<>();
     Map<Point2D, Point2D> doorToKey = new HashMap<>();
     Map<ImmutablePair<Point2D, Set<Point2D>>, Integer> cache = new HashMap<>();
-    Map<ImmutablePair<Point2D, Point2D>, List<Point2D>> pathsCache = new HashMap<>();
+    Map<ImmutablePair<Point2D, Point2D>, ImmutablePair<Set<Point2D>, Integer>> pathsCache = new HashMap<>();
     ShortestPathAlgorithm<Point2D, DefaultWeightedEdge> shortestPathAlg;
 
     public Level18(String filename) {
@@ -34,7 +34,11 @@ public class Level18 extends Level {
                     partitionKeys.forEach(
                             sk -> {
                                 if (!sk.equals(k)) {
-                                    pathsCache.put(ImmutablePair.of(k, sk), alg.getPath(sk).getVertexList());
+                                    List<Point2D> fullPath = alg.getPath(sk).getVertexList();
+                                    int pathLength = fullPath.size();
+                                    Set<Point2D> doorsOnly = fullPath.stream().filter(z -> doors.contains(z)).collect(Collectors.toSet());
+                                    pathsCache.put(ImmutablePair.of(k, sk),
+                                            ImmutablePair.of(doorsOnly, pathLength));
                                 }
                             }
                     );
@@ -43,20 +47,24 @@ public class Level18 extends Level {
         ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge> alg = shortestPathAlg.getPaths(partitionStart);
         partitionKeys.forEach(
                 k -> {
-                    pathsCache.put(ImmutablePair.of(partitionStart, k), alg.getPath(k).getVertexList());
+                    List<Point2D> fullPath = alg.getPath(k).getVertexList();
+                    int pathLength = fullPath.size();
+                    Set<Point2D> doorsOnly = fullPath.stream().filter(z -> doors.contains(z)).collect(Collectors.toSet());
+                    pathsCache.put(ImmutablePair.of(partitionStart, k),
+                            ImmutablePair.of(doorsOnly, pathLength));
                 }
         );
     }
 
-    void parseMap(List<String> indata) {
+    void parseMap(List<String> in) {
         Point2D[] ks = new Point2D[32];
         Point2D[] ds = new Point2D[32];
-        int w = indata.get(0).length();
-        int h = indata.size();
+        int w = in.get(0).length();
+        int h = in.size();
 
         char[][] asChars = new char[h][w];
         for (int i = 0; i < h; i++) {
-            asChars[i] = indata.get(i).toCharArray();
+            asChars[i] = in.get(i).toCharArray();
         }
 
         for (int i = 0; i < h; i++) {
@@ -192,13 +200,13 @@ public class Level18 extends Level {
                 reachableKeys.put(potentiallyReachable, 0);
                 continue;
             }
-            List<Point2D> path = pathsCache.get(ImmutablePair.of(currentPoint, potentiallyReachable));
-            for (Point2D p : path) {
+            ImmutablePair<Set<Point2D>, Integer> path = pathsCache.get(ImmutablePair.of(currentPoint, potentiallyReachable));
+            for (Point2D p : path.getLeft()) {
                 if (doors.contains(p) && keysLeft.contains(doorToKey.get(p))) {
                     continue outerLoop;
                 }
             }
-            reachableKeys.put(potentiallyReachable, path.size() - 1);
+            reachableKeys.put(potentiallyReachable, path.getRight() - 1);
         }
         if (reachableKeys.size() == 0) {
             throw new RuntimeException("No reachable keys");
