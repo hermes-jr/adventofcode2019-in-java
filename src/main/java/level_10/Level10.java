@@ -9,15 +9,11 @@ import java.util.*;
 
 public class Level10 extends Level {
     final static boolean VERBOSE = false;
-    List<Point2D> asteroids;
-    SortedMap<BigDecimal, List<Point2D>> lines = new TreeMap<>();
-    int MAX_X;
-    int MAX_Y;
+    final List<Point2D> asteroids;
+    final SortedMap<BigDecimal, List<Point2D>> lines = new TreeMap<>();
 
     public Level10(String filename) {
         List<String> s = readResources(filename);
-        MAX_X = s.get(0).length();
-        MAX_Y = s.size();
         asteroids = parseData(s);
     }
 

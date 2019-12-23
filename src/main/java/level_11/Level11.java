@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 
 public class Level11 extends Level {
     IntComp ic;
-    String prog;
-    Map<Point2D, Long> plate = new HashMap<>();
-    static List<ImmutablePair<Integer, Integer>> directions = new LinkedList<>();
+    final String prog;
+    final Map<Point2D, Long> plate = new HashMap<>();
+    static final List<ImmutablePair<Integer, Integer>> directions = new LinkedList<>();
 
     private static void initDirections() {
         directions.clear();

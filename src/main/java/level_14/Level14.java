@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Level14 extends Level {
-    Map<String, Reaction> knownReactions = new HashMap<>();
-    Map<String, Long> warehouse = new HashMap<>();
+    final Map<String, Reaction> knownReactions = new HashMap<>();
+    final Map<String, Long> warehouse = new HashMap<>();
     final long ORE_LIMIT = 1000000000000L;
 
     Level14(String filename) {

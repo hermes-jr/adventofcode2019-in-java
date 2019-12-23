@@ -1,8 +1,8 @@
 package level_04;
 
 public class Level04 {
-    static int b1 = 197487;
-    static int b2 = 673251;
+    static final int b1 = 197487;
+    static final int b2 = 673251;
 
     public static void main(String[] args) {
         Level04 l = new Level04();

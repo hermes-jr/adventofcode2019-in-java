@@ -7,10 +7,10 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import java.util.*;
 
 public class Level23 extends Level {
-    String prog;
-    Map<Long, Queue<ImmutablePair<Long, Long>>> network = new HashMap<>();
+    final String prog;
+    final Map<Long, Queue<ImmutablePair<Long, Long>>> network = new HashMap<>();
     ImmutablePair<Long, Long> lastNatPacket = null;
-    Set<Long> seenByNat = new HashSet<>();
+    final Set<Long> seenByNat = new HashSet<>();
 
     public Level23(String filename) {
         prog = readResourcesFirstLine(filename);
@@ -39,7 +39,6 @@ public class Level23 extends Level {
                     idle = false;
                     if (recipient == 255L) {
                         lastNatPacket = ImmutablePair.of(left, right);
-//                        seenByNat.add(right);
                         if (result == -1) {
                             result = right;
                             System.out.println("Part1: " + result);

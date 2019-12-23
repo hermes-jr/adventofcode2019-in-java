@@ -4,8 +4,8 @@ import common.Level;
 
 public class Level08 extends Level {
     int[] data;
-    int w;
-    int h;
+    final int w;
+    final int h;
     int layers;
 
     public Level08(String filename, int w, int h) {
@@ -15,8 +15,8 @@ public class Level08 extends Level {
         this.data = parseData(s);
     }
 
-    int[] parseData(String indata) {
-        String[] tokens = indata.split("");
+    int[] parseData(String in) {
+        String[] tokens = in.split("");
         int[] result = new int[tokens.length];
         for (int i = 0; i < tokens.length; i++) {
             result[i] = Integer.parseInt(tokens[i]);

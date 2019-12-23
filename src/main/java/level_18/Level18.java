@@ -13,13 +13,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Level18 extends Level {
-    SimpleGraph<Point2D, DefaultWeightedEdge> g = new SimpleGraph<>(DefaultWeightedEdge.class);
+    final SimpleGraph<Point2D, DefaultWeightedEdge> g = new SimpleGraph<>(DefaultWeightedEdge.class);
     Point2D startingPosition;
-    Set<Point2D> keys = new HashSet<>();
-    Set<Point2D> doors = new HashSet<>();
-    Map<Point2D, Point2D> doorToKey = new HashMap<>();
-    Map<ImmutablePair<Point2D, Set<Point2D>>, Integer> cache = new HashMap<>();
-    Map<ImmutablePair<Point2D, Point2D>, ImmutablePair<Set<Point2D>, Integer>> pathsCache = new HashMap<>();
+    final Set<Point2D> keys = new HashSet<>();
+    final Set<Point2D> doors = new HashSet<>();
+    final Map<Point2D, Point2D> doorToKey = new HashMap<>();
+    final Map<ImmutablePair<Point2D, Set<Point2D>>, Integer> cache = new HashMap<>();
+    final Map<ImmutablePair<Point2D, Point2D>, ImmutablePair<Set<Point2D>, Integer>> pathsCache = new HashMap<>();
     ShortestPathAlgorithm<Point2D, DefaultWeightedEdge> shortestPathAlg;
 
     public Level18(String filename) {
@@ -34,11 +34,7 @@ public class Level18 extends Level {
                     partitionKeys.forEach(
                             sk -> {
                                 if (!sk.equals(k)) {
-                                    List<Point2D> fullPath = alg.getPath(sk).getVertexList();
-                                    int pathLength = fullPath.size();
-                                    Set<Point2D> doorsOnly = fullPath.stream().filter(z -> doors.contains(z)).collect(Collectors.toSet());
-                                    pathsCache.put(ImmutablePair.of(k, sk),
-                                            ImmutablePair.of(doorsOnly, pathLength));
+                                    collectDoorsAndPaths(k, alg, sk);
                                 }
                             }
                     );
@@ -46,14 +42,16 @@ public class Level18 extends Level {
         );
         ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge> alg = shortestPathAlg.getPaths(partitionStart);
         partitionKeys.forEach(
-                k -> {
-                    List<Point2D> fullPath = alg.getPath(k).getVertexList();
-                    int pathLength = fullPath.size();
-                    Set<Point2D> doorsOnly = fullPath.stream().filter(z -> doors.contains(z)).collect(Collectors.toSet());
-                    pathsCache.put(ImmutablePair.of(partitionStart, k),
-                            ImmutablePair.of(doorsOnly, pathLength));
-                }
+                k -> collectDoorsAndPaths(partitionStart, alg, k)
         );
+    }
+
+    private void collectDoorsAndPaths(Point2D k, ShortestPathAlgorithm.SingleSourcePaths<Point2D, DefaultWeightedEdge> alg, Point2D sk) {
+        List<Point2D> fullPath = alg.getPath(sk).getVertexList();
+        int pathLength = fullPath.size();
+        Set<Point2D> doorsOnly = fullPath.stream().filter(doors::contains).collect(Collectors.toSet());
+        pathsCache.put(ImmutablePair.of(k, sk),
+                ImmutablePair.of(doorsOnly, pathLength));
     }
 
     void parseMap(List<String> in) {

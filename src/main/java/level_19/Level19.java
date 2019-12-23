@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Queue;
 
 public class Level19 extends Level {
-    private Drone drone;
+    private final Drone drone;
     private static final int SQUARE_SIZE = 100;
     private static final boolean VERBOSE = false;
 
@@ -98,7 +98,7 @@ public class Level19 extends Level {
     }
 
     static class Drone {
-        IntComp ic;
+        final IntComp ic;
 
         Drone(String program) {
             ic = new IntComp(program, 0);

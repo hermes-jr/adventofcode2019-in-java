@@ -8,9 +8,9 @@ import common.Point3D;
 import java.util.*;
 
 public class Level13 extends Level {
-    IntComp ic;
-    String prog;
-    Map<Point2D, Integer> screen = new HashMap<>();
+    final IntComp ic;
+    final String prog;
+    final Map<Point2D, Integer> screen = new HashMap<>();
     Point3D ball = null;
     Point2D pad;
     long score;

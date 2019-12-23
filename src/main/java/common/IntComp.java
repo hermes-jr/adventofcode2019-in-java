@@ -1,6 +1,9 @@
 package common;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 
 public class IntComp {
     Map<Long, Long> data;
@@ -8,8 +11,8 @@ public class IntComp {
     int id;
     long ip;
     long relBase;
-    Queue<Long> input = new LinkedList<>();
-    Queue<Long> output = new LinkedList<>();
+    final Queue<Long> input = new LinkedList<>();
+    final Queue<Long> output = new LinkedList<>();
 
     public IntComp(String s, int id) {
         originalProg = s;
@@ -63,7 +66,7 @@ public class IntComp {
         NO_INPUT
     }
 
-    static Map<Integer, Integer> argSizes = new HashMap<>();
+    static final Map<Integer, Integer> argSizes = new HashMap<>();
 
     static {
         argSizes.put(1, 3);
@@ -76,16 +79,6 @@ public class IntComp {
         argSizes.put(8, 3);
         argSizes.put(9, 1);
         argSizes.put(99, 0);
-    }
-
-    public ReturnReason run(Collection<Long> inData) {
-        this.input.addAll(inData);
-        return run();
-    }
-
-    public ReturnReason run(long singleArg) {
-        this.input.add(singleArg);
-        return run();
     }
 
     public ReturnReason run() {

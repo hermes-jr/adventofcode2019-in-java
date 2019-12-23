@@ -20,18 +20,18 @@ import java.util.stream.Collectors;
 public class Level20 extends Level {
     Point3D start;
     Point3D end;
-    Map<String, Point3D> innerPortals = new HashMap<>();
-    Map<String, Point3D> outerPortals = new HashMap<>();
+    final Map<String, Point3D> innerPortals = new HashMap<>();
+    final Map<String, Point3D> outerPortals = new HashMap<>();
 
-    SimpleGraph<Point3D, DefaultEdge> parseMap(List<String> indata) {
+    SimpleGraph<Point3D, DefaultEdge> parseMap(List<String> in) {
         SimpleGraph<Point3D, DefaultEdge> g = new SimpleGraph<>(DefaultEdge.class);
 
-        int w = indata.get(0).length();
-        int h = indata.size();
+        int h = in.size();
+        int w = in.get(0).length();
 
         char[][] asChars = new char[h][w];
         for (int i = 0; i < h; i++) {
-            asChars[i] = indata.get(i).toCharArray();
+            asChars[i] = in.get(i).toCharArray();
         }
 
         for (int i = 0; i < h; i++) {
@@ -125,8 +125,7 @@ public class Level20 extends Level {
         // Remove all existing inter-portal links
         innerPortals.forEach((key, value) -> g.removeEdge(value, outerPortals.get(key)));
 
-        //noinspection unchecked
-        SimpleGraph<Point3D, DefaultEdge> templateLevel = (SimpleGraph<Point3D, DefaultEdge>) g.clone();
+        final SimpleGraph<Point3D, DefaultEdge> templateLevel = createTemplateLevel(g);
         templateLevel.removeVertex(start);
         templateLevel.removeVertex(end);
 
@@ -159,6 +158,11 @@ public class Level20 extends Level {
         }
 
         return getShortestPath(g);
+    }
+
+    @SuppressWarnings("unchecked")
+    private SimpleGraph<Point3D, DefaultEdge> createTemplateLevel(SimpleGraph<Point3D, DefaultEdge> g) {
+        return (SimpleGraph<Point3D, DefaultEdge>) g.clone();
     }
 
     private int getShortestPath(SimpleGraph<Point3D, DefaultEdge> g) {

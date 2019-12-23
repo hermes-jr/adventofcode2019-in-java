@@ -9,8 +9,8 @@ import java.util.*;
 public class Level07 extends Level {
     String initialState;
 
-    void parseData(String indata) {
-        initialState = indata;
+    void parseData(String in) {
+        initialState = in;
     }
 
     long p1() {

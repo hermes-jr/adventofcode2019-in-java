@@ -17,9 +17,9 @@ public class Level15 extends Level {
 
     int oxDistanceFromStart = 0;
     int maxPathFromOx = 0;
-    private Bot bot;
-    private Set<Point2D> visited = new HashSet<>();
-    private Set<Point2D> walls = new HashSet<>();
+    private final Bot bot;
+    private final Set<Point2D> visited = new HashSet<>();
+    private final Set<Point2D> walls = new HashSet<>();
     boolean firstVisit = true;
     private final static boolean VERBOSE = false;
 
@@ -193,7 +193,7 @@ public class Level15 extends Level {
     }
 
     class Bot {
-        IntComp ic;
+        final IntComp ic;
         @Getter
         Point2D location = Point2D.ZERO;
         @Getter

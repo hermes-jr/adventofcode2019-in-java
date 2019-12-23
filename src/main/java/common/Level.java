@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public abstract class Level {
-    Map<String, List<String>> cached = new HashMap<>();
+    final Map<String, List<String>> cached = new HashMap<>();
 
     public String readResourcesFirstLine(String filename) {
         return readResources(filename).get(0);

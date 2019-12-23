@@ -7,10 +7,10 @@ import java.util.List;
 
 public class Level22 extends Level {
     int card2019 = 2019;
-    int deckSize;
-    BigInteger cards = BigInteger.valueOf(119315717514047L);
-    BigInteger repeats = BigInteger.valueOf(101741582076661L);
-    List<String> commands;
+    final int deckSize;
+    final BigInteger cards = BigInteger.valueOf(119315717514047L);
+    final BigInteger repeats = BigInteger.valueOf(101741582076661L);
+    final List<String> commands;
 
     public Level22(int deckSize, String filename) {
         commands = readResources(filename);

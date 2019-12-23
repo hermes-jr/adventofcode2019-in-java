@@ -36,7 +36,7 @@ class Level09Test {
         IntComp comp = new IntComp(prog, 0);
         comp.run();
         assertThat(comp.getOutput().peek()).isNotNull();
-        assertThat(comp.getOutput().peek().toString()).hasSize(16);
+        assertThat(Objects.requireNonNull(comp.getOutput().peek()).toString()).hasSize(16);
     }
 
     @Test

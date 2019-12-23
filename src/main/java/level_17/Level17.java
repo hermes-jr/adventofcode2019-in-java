@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Queue;
 
 public class Level17 extends Level {
-    IntComp ic;
-    String prog;
+    final IntComp ic;
+    final String prog;
     boolean[][] map;
     Point2D startingPoint;
     private static final boolean VERBOSE = false;

@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class Level21 extends Level {
-    IntComp ic;
-    String prog;
+    final IntComp ic;
+    final String prog;
     private static final boolean VERBOSE = false;
 
     public Level21(String input) {
@@ -17,25 +17,6 @@ public class Level21 extends Level {
     }
 
     public long p1() {
-        /*
-    #### -
-    ###. -
-    ##.# +
-    ##.. -
-    #.## -
-    #.#. -
-    #..# +
-    #... -
-    .### +
-    .##. +-
-    .#.# +
-    .#.. +
-    ..## +
-    ..#. +-
-    ...# +
-    ABCD
-    !A || (!C && D)
-         */
         ic.run();
         feedToBot("NOT A T");
         feedToBot("OR T J");

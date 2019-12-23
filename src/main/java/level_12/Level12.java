@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class Level12 extends Level {
     final static AtomicInteger moonCounter = new AtomicInteger(0);
     final Pattern coordinatesPattern = Pattern.compile("^<x=(-?[0-9]+), y=(-?[0-9]+), z=(-?[0-9]+)>$");
-    List<Moon> moons = new ArrayList<>();
+    final List<Moon> moons = new ArrayList<>();
 
     public Level12(String input) {
         for (String s : readResources(input)) {
@@ -41,9 +41,9 @@ public class Level12 extends Level {
     }
 
     public long p2() {
-        int xrep = 0;
-        int yrep = 0;
-        int zrep = 0;
+        int xRep = 0;
+        int yRep = 0;
+        int zRep = 0;
         String xState = moons.stream().map(z -> z.getPosition().getX() + "," + z.getVelocity().getX()).collect(Collectors.joining(","));
         String yState = moons.stream().map(z -> z.getPosition().getY() + "," + z.getVelocity().getY()).collect(Collectors.joining(","));
         String zState = moons.stream().map(z -> z.getPosition().getZ() + "," + z.getVelocity().getZ()).collect(Collectors.joining(","));
@@ -52,20 +52,20 @@ public class Level12 extends Level {
         while (true) {
             doStep();
             steps++;
-            if (xrep != 0 && yrep != 0 && zrep != 0) {
+            if (xRep != 0 && yRep != 0 && zRep != 0) {
                 break;
             }
-            if (xrep == 0 && xState.equals(moons.stream().map(z -> z.getPosition().getX() + "," + z.getVelocity().getX()).collect(Collectors.joining(",")))) {
-                xrep = steps;
+            if (xRep == 0 && xState.equals(moons.stream().map(z -> z.getPosition().getX() + "," + z.getVelocity().getX()).collect(Collectors.joining(",")))) {
+                xRep = steps;
             }
-            if (yrep == 0 && yState.equals(moons.stream().map(z -> z.getPosition().getY() + "," + z.getVelocity().getY()).collect(Collectors.joining(",")))) {
-                yrep = steps;
+            if (yRep == 0 && yState.equals(moons.stream().map(z -> z.getPosition().getY() + "," + z.getVelocity().getY()).collect(Collectors.joining(",")))) {
+                yRep = steps;
             }
-            if (zrep == 0 && zState.equals(moons.stream().map(z -> z.getPosition().getZ() + "," + z.getVelocity().getZ()).collect(Collectors.joining(",")))) {
-                zrep = steps;
+            if (zRep == 0 && zState.equals(moons.stream().map(z -> z.getPosition().getZ() + "," + z.getVelocity().getZ()).collect(Collectors.joining(",")))) {
+                zRep = steps;
             }
         }
-        return lcm(xrep, lcm(yrep, zrep));
+        return lcm(xRep, lcm(yRep, zRep));
     }
 
     public static long lcm(long number1, long number2) {
@@ -127,9 +127,9 @@ public class Level12 extends Level {
     }
 
     static class Moon {
-        Point3D position;
+        final Point3D position;
         Point3D velocity;
-        int id;
+        final int id;
 
         Moon(Point3D position, Point3D velocity) {
             this.position = position;
