@@ -4,40 +4,46 @@ import common.IntComp;
 import common.Level;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 
 public class Level23 extends Level {
     String prog;
-    LinkedHashMap<Long, Queue<ImmutablePair<Long, Long>>> network = new LinkedHashMap<>();
+    Map<Long, Queue<ImmutablePair<Long, Long>>> network = new HashMap<>();
+    ImmutablePair<Long, Long> lastNatPacket = null;
+    Set<Long> seenByNat = new HashSet<>();
 
     public Level23(String filename) {
         prog = readResourcesFirstLine(filename);
     }
 
-    long p1() {
+    void networkGo() {
         IntComp[] ics = new IntComp[50];
         for (int i = 0; i < 50; i++) {
             ics[i] = new IntComp(prog, i);
             ics[i].run();
             ics[i].addToInput(i);
         }
-        long result = 0;
-        while (result == 0) {
+        long result = -1;
+        while (true) {
+            boolean idle = true;
             for (int i = 0; i < 50; i++) {
                 IntComp cic = ics[i];
                 cic.run();
                 if (!cic.getOutput().isEmpty()) {
                     long recipient = Objects.requireNonNull(cic.getOutput().poll());
-                    long dataX = Objects.requireNonNull(cic.getOutput().poll());
-                    long dataY = Objects.requireNonNull(cic.getOutput().poll());
+                    long left = Objects.requireNonNull(cic.getOutput().poll());
+                    long right = Objects.requireNonNull(cic.getOutput().poll());
                     Queue<ImmutablePair<Long, Long>> sendQueue = network.getOrDefault(recipient, new LinkedList<>());
-                    sendQueue.add(ImmutablePair.of(dataX, dataY));
+                    sendQueue.add(ImmutablePair.of(left, right));
                     network.put(recipient, sendQueue);
+                    idle = false;
                     if (recipient == 255L) {
-                        result = dataY;
+                        lastNatPacket = ImmutablePair.of(left, right);
+//                        seenByNat.add(right);
+                        if (result == -1) {
+                            result = right;
+                            System.out.println("Part1: " + result);
+                        }
                     }
                 }
                 Queue<ImmutablePair<Long, Long>> forMe = network.getOrDefault((long) i, new LinkedList<>());
@@ -49,14 +55,24 @@ public class Level23 extends Level {
                         cic.addToInput(val.getLeft());
                         cic.addToInput(val.getRight());
                     }
+                    idle = false;
                 }
             }
+            if (idle && lastNatPacket != null) {
+                Queue<ImmutablePair<Long, Long>> startPacket = new LinkedList<>();
+                startPacket.add(lastNatPacket);
+                if (seenByNat.contains(lastNatPacket.getRight())) {
+                    System.out.println("Part2: " + lastNatPacket.getRight());
+                    break;
+                }
+                seenByNat.add(lastNatPacket.getRight());
+                network.put(0L, startPacket);
+            }
         }
-        return result;
     }
 
     public static void main(String[] args) {
         Level23 l = new Level23("input");
-        System.out.println("Part1: " + l.p1());
+        l.networkGo();
     }
 }
