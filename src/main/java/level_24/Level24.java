@@ -61,11 +61,13 @@ public class Level24 extends Level {
     }
 
     int p2(int steps) {
+        int minZ = DEFAULT_LAYER - 1; // Limit scan area, 4 times speedup
+        int maxZ = DEFAULT_LAYER + 1;
         for (int step = 0; step < steps; step++) {
             boolean[] nextFrame = new boolean[recursiveMap.length];
 
             if (VERBOSE) printAllDimensions();
-            for (int z = 1; z < STACK_DEPTH - 1; z++) {
+            for (int z = minZ; z <= maxZ; z++) {
                 for (int y = 0; y < H; y++) {
                     for (int x = 0; x < W; x++) {
                         if (x == 2 && y == 2) {
@@ -82,6 +84,12 @@ public class Level24 extends Level {
                 }
             }
             recursiveMap = nextFrame;
+            if (getBiodiversity(minZ) > 0) {
+                minZ--;
+            }
+            if (getBiodiversity(maxZ) > 0) {
+                maxZ++;
+            }
         }
         int result = 0;
         for (boolean cell : recursiveMap) {
