@@ -10,13 +10,13 @@ class Level24Test {
     @Test
     void biodiversityCalculation() {
         Level24 l = new Level24("in1");
-//        assertThat(l.getBiodiversity(l.recursiveMap[DEFAULT_LAYER])).isEqualTo(2129920L);
+        assertThat(l.getBiodiversity(DEFAULT_LAYER)).isEqualTo(2129920L);
     }
 
     @Test
     void givenExampleShouldWork() {
         Level24 l = new Level24("in0");
-//        assertThat(l.p1()).isEqualTo(2129920L);
+        assertThat(l.p1()).isEqualTo(2129920L);
     }
 
     @Test
