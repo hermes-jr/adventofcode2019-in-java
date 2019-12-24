@@ -10,7 +10,7 @@ public class Level24 extends Level {
     final private int H = 5;
     final static int DEFAULT_LAYER = 200;
     final static int STACK_DEPTH = 402; // Bugs can't get deeper in 200 steps
-    List<String> in;
+    final List<String> in;
     boolean[] recursiveMap;
     final private static boolean VERBOSE = false;
 
