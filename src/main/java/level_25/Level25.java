@@ -13,12 +13,10 @@ import java.util.regex.Pattern;
 
 public class Level25 extends Level {
     final IntComp ic;
-    final String prog;
     private static final boolean VERBOSE = false;
 
     public Level25(String input) {
-        prog = readResourcesFirstLine(input);
-        ic = new IntComp(prog, 0);
+        ic = new IntComp(readResourcesFirstLine(input), 0);
     }
 
     // I've manually mapped the place, too lazy to automate. Only the combination search will be coded
@@ -133,5 +131,6 @@ public class Level25 extends Level {
     public static void main(String[] args) {
         Level25 l = new Level25("input");
         System.out.println("Part1: " + l.p1());
+        System.out.println("Part2: Happy Holidays!");
     }
 }
